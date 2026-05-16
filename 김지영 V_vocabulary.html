@@ -1,0 +1,7256 @@
+﻿<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이든 단어학습 TEST </title>
+<style>
+body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f7f6; padding: 20px; }
+h1, h2 { color: #2c3e50; margin: 0; }
+.container { max-width: 1300px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); position: relative; }
+
+/* 관리자 패널 스타일 */
+.admin-panel { background: #fdebd0; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f39c12; display: flex; align-items: center; gap: 15px; }
+.admin-panel input[type="password"] { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }
+
+/* 제어 패널 스타일 */
+.control-panel { margin-bottom: 20px; background: #ecf0f1; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; }
+.control-panel select { padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #bdc3c7; font-weight: bold; }
+
+/* 탭 스타일 */
+.tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #3498db; }
+.tab { padding: 10px 20px; cursor: pointer; font-weight: bold; background: #ecf0f1; border: none; outline: none; transition: 0.3s; }
+.tab.active { background: #3498db; color: white; border-radius: 5px 5px 0 0; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* 테이블 스타일 */
+.table-responsive { overflow-x: auto; }
+table { width: 100%; min-width: 1000px; border-collapse: collapse; margin-bottom: 20px; text-align: center; font-size: 14px; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background-color: #34495e; color: white; position: sticky; top: 0; }
+input[type="text"] { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+
+/* 버튼 그룹 스타일 */
+.btn-group { margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { padding: 8px 15px; border: none; border-radius: 4px; background: #2ecc71; color: white; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+.btn:hover { background: #27ae60; }
+.btn-test { background: #e74c3c; }
+.btn-test:hover { background: #c0392b; }
+.btn-step3 { background: #f39c12; }
+.btn-step3:hover { background: #d68910; }
+
+/* 채점 색상 및 숨김 처리 */
+.hidden { display: none !important; }
+
+/* 철자 게임 스타일 */
+#spelling-game { text-align: center; padding: 30px; }
+#target-meaning { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #8e44ad; }
+#typed-word { font-size: 32px; letter-spacing: 5px; font-weight: bold; margin-bottom: 20px; min-height: 40px; color: #2c3e50; border-bottom: 2px dashed #ccc; display: inline-block; padding: 0 20px; }
+.letter-boxes { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+.letter-box { width: 60px; height: 60px; font-size: 28px; font-weight: bold; display: flex; align-items: center; justify-content: center; background: #3498db; color: white; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 0 #2980b9; transition: transform 0.1s, background 0.2s; user-select: none; }
+.letter-box:active { transform: translateY(4px); box-shadow: 0 0 0; }
+.letter-box.wrong-click { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; animation: shake 0.3s; }
+
+@keyframes shake {
+0%, 100% { transform: translateX(0); }
+25% { transform: translateX(-5px); }
+75% { transform: translateX(5px); }
+}
+
+/* 철자 게임 완료 플래시카드 애니메이션 스타일 추가 */
+#flashcard-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(44, 62, 80, 0.95); z-index: 10000;
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; color: white; opacity: 1; transition: opacity 0.5s ease;
+}
+#flashcard-word { font-size: 80px; font-weight: bold; margin-bottom: 20px; color: #deff9a; letter-spacing: 2px; }
+#flashcard-meaning { font-size: 40px; font-weight: 500; }
+
+/* 전송 버튼 구역 스타일 */
+.submit-section { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #bdc3c7; text-align: center; }
+
+/* 헤더 플렉스 박스 스타일 */
+.header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1; }
+
+/* 매뉴얼 오버레이 및 박스 스타일 (HTML5 디자인) */
+#manual-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10005; align-items: center; justify-content: center; }
+.manual-wrapper { background: #ffffff; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; border-radius: 12px; border: 3px solid #3498db; box-shadow: 0 15px 30px rgba(0,0,0,0.3); padding: 30px; box-sizing: border-box; }
+.manual-title { text-align: center; color: #2c3e50; font-size: 28px; border-bottom: 4px double #3498db; padding-bottom: 15px; margin-bottom: 25px; font-weight: bold; }
+.manual-box { border: 2px solid #bdc3c7; border-radius: 8px; margin-bottom: 25px; overflow: hidden; }
+.manual-box-header { background: #ecf0f1; padding: 12px 20px; color: #2980b9; font-weight: bold; font-size: 18px; border-bottom: 2px solid #bdc3c7; display: flex; align-items: center; gap: 10px; }
+.manual-box-content { padding: 20px; background: #fafafa; }
+.manual-step { border-left: 5px solid #3498db; padding-left: 15px; margin-bottom: 15px; color: #34495e; font-size: 15px; line-height: 1.6; }
+.manual-step strong { color: #e74c3c; }
+.manual-step-accent { border-left-color: #8e44ad; }
+.manual-close-btn { display: block; width: 100%; max-width: 250px; margin: 30px auto 0; padding: 15px; background: #34495e; color: white; text-align: center; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.2s; }
+.manual-close-btn:hover { background: #2c3e50; }
+</style>
+</head>
+<body>
+
+<div id="student-login-overlay" style="display: flex; position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: rgb(52, 73, 94); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <h2 style="color: #2c3e50; margin-bottom: 10px;">학습 시스템 로그인</h2>
+        <p id="login-desc" style="color: #e74c3c; font-size: 13px; margin-bottom: 25px; text-align: left;">최초 로그인 시 좌석번호, 이름, 비밀번호를 입력하세요. 이후엔 비밀번호만 입력합니다.</p>
+        
+        <input type="text" id="stu-seat" placeholder="좌석명 (예: 1번자리)" style="width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+        <input type="text" id="stu-name" placeholder="학생 이름" style="width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+        <input type="password" id="stu-pw" placeholder="비밀번호" style="width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+        
+        <button id="login-btn" class="btn" style="width: 100%; padding: 14px; font-size: 16px; background-color: #2ecc71;" onclick="studentLogin()">로그인 및 학습 시작</button>
+        <p id="reset-user-btn" style="display: none; margin-top: 15px; font-size: 13px; color: #7f8c8d; text-decoration: underline; cursor: pointer;" onclick="resetUser()">다른 학생으로 로그인하기</p>
+    </div>
+</div>
+
+<div id="unsent-data-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 10001; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <h2 style="color: #e74c3c; margin-bottom: 10px;">미전송 학습 기록 알림</h2>
+        <p style="color: #2c3e50; font-size: 14px; margin-bottom: 25px;">이전에 완료하고 전송하지 않은 학습 결과가 있습니다.<br>해당 결과를 전송해야 새로운 학습을 시작할 수 있습니다.</p>
+        <button id="unsent-submit-btn" class="btn" style="width: 100%; padding: 14px; font-size: 16px; background-color: #8e44ad;" onclick="submitUnsentData()">이전 학습 결과 전송하기</button>
+        <p style="margin-top: 15px; font-size: 13px; color: #7f8c8d; text-decoration: underline; cursor: pointer;" onclick="discardUnsentData()">전송하지 않고 기록 삭제 (새로 시작)</p>
+    </div>
+</div>
+
+<div id="flashcard-overlay">
+    <div id="flashcard-word">word</div>
+    <div id="flashcard-meaning">뜻</div>
+</div>
+
+<div id="manual-overlay">
+    <div class="manual-wrapper">
+        <div class="manual-title">📖 학생용 시스템 사용 매뉴얼</div>
+        
+        <div class="manual-box">
+            <div class="manual-box-header">🔐 1. 시스템 로그인 방법</div>
+            <div class="manual-box-content">
+                <div class="manual-step"><strong>최초 접속 시:</strong> 좌석번호, 이름, 그리고 선생님이 알려주신 비밀번호를 정확히 입력합니다.</div>
+                <div class="manual-step"><strong>이후 접속 시:</strong> 시스템이 이름을 기억합니다. 비밀번호만 입력하고 학습을 바로 시작하세요. (다른 사람이 쓰던 자리라면 '다른 학생으로 로그인하기'를 눌러주세요)</div>
+            </div>
+        </div>
+
+        <div class="manual-box">
+            <div class="manual-box-header">📝 2. 이든 단어 TEST 진행 순서</div>
+            <div class="manual-box-content">
+                <div class="manual-step"><strong>1차 테스트:</strong> 정답을 입력하고 채점하세요. 틀린 단어는 자동으로 다음 2차 테스트 대기열로 넘어갑니다.</div>
+                <div class="manual-step"><strong>2차/3차 테스트:</strong> [테스트 시작] 버튼을 눌러 이전 단계의 정답을 가리고, 틀렸던 단어만 모아서 다시 시험을 봅니다.</div>
+                <div class="manual-step"><strong>오답 처리:</strong> 뜻이 여러 개인 경우 일부만 적으면 정답 처리되지만 파란색으로 표시됩니다. 완전히 틀린 경우 빨간색으로 오답노트에 기록됩니다.</div>
+            </div>
+        </div>
+
+        <div class="manual-box">
+            <div class="manual-box-header">⌨️ 3. 탭별 학습 요령</div>
+            <div class="manual-box-content">
+                <div class="manual-step">[1. 뜻 쓰기 테스트] 단어의 뜻을 한글로 적습니다. 뜻이 여러 개라면 <strong>쉼표(,)</strong>로 구분해서 적으세요. (띄어쓰기는 무시됩니다.)</div>
+                <div class="manual-step">[2. 철자 쓰기 테스트] 한글 뜻을 보고 영어 단어 스펠링을 정확하게 입력하세요.</div>
+                <div class="manual-step">[3. 철자 맞추기 게임] 박스에 있는 알파벳을 올바른 순서대로 클릭하여 단어를 완성하세요. 완료 시 원어민 발음과 플래시카드가 나타납니다.</div>
+            </div>
+        </div>
+
+        <div class="manual-box" style="border-color: #8e44ad;">
+            <div class="manual-box-header" style="background-color: #f3e5f5; color: #8e44ad; border-bottom-color: #8e44ad;">🚀 4. 학습 결과 전송 (가장 중요!)</div>
+            <div class="manual-box-content">
+                <div class="manual-step manual-step-accent">모든 학습과 테스트가 끝나면 화면 맨 아래에 있는 <strong>[오늘 학습 결과 구글폼으로 전송하기]</strong> 보라색 버튼을 반드시 눌러야 합니다.</div>
+                <div class="manual-step manual-step-accent">전송하지 않고 창을 닫으면 다음 접속 시 경고창이 나타나며, 이전 기록을 전송해야 새 학습을 시작할 수 있습니다.</div>
+            </div>
+        </div>
+
+        <div class="manual-close-btn" onclick="document.getElementById('manual-overlay').style.display='none'">닫기 (학습 시작하기)</div>
+    </div>
+</div>
+
+<div class="container">
+<div class="header-container">
+    <h1>미사이든학원 단어 TEST</h1>
+    <button class="btn" style="background-color: #3498db; font-size: 15px;" onclick="document.getElementById('manual-overlay').style.display='flex'">📖 사용 매뉴얼 보기</button>
+</div>
+
+
+
+<div class="control-panel">
+<label for="unit-select"><strong>학습 단원 선택:</strong></label>
+<select id="unit-select" onchange="changeUnit()"><option value="01_1 단원">01_1 단원</option><option value="01_2 단원">01_2 단원</option><option value="02_1 단원">02_1 단원</option><option value="02_2 단원">02_2 단원</option><option value="02_3 단원">02_3 단원</option><option value="03_1 단원">03_1 단원</option><option value="03_2 단원">03_2 단원</option><option value="03_3 단원">03_3 단원</option><option value="03_4 단원">03_4 단원</option><option value="03_5 단원">03_5 단원</option><option value="03_6 단원">03_6 단원</option><option value="04_1 단원">04_1 단원</option><option value="04_2 단원">04_2 단원</option><option value="04_3 단원">04_3 단원</option><option value="05_1 단원">05_1 단원</option><option value="06_1 단원">06_1 단원</option><option value="06_2 단원">06_2 단원</option><option value="06_3 단원">06_3 단원</option><option value="06_4 단원">06_4 단원</option><option value="07_1 단원">07_1 단원</option><option value="07_2 단원">07_2 단원</option><option value="07_3 단원">07_3 단원</option><option value="07_4 단원">07_4 단원</option><option value="07_5 단원">07_5 단원</option><option value="07_6 단원">07_6 단원</option><option value="07_7 단원">07_7 단원</option><option value="07_8 단원">07_8 단원</option><option value="07_9 단원">07_9 단원</option><option value="07_10 단원">07_10 단원</option><option value="07_11 단원">07_11 단원</option><option value="07_12 단원">07_12 단원</option><option value="07_13 단원">07_13 단원</option><option value="07_14 단원">07_14 단원</option><option value="07_15 단원">07_15 단원</option><option value="07_16 단원">07_16 단원</option><option value="07_17 단원">07_17 단원</option><option value="07_18 단원">07_18 단원</option><option value="07_19 단원">07_19 단원</option><option value="07_20 단원">07_20 단원</option><option value="07_21 단원">07_21 단원</option><option value="07_22 단원">07_22 단원</option><option value="07_23 단원">07_23 단원</option><option value="07_24 단원">07_24 단원</option><option value="07_25 단원">07_25 단원</option><option value="07_26 단원">07_26 단원</option><option value="07_27 단원">07_27 단원</option><option value="07_28 단원">07_28 단원</option><option value="07_29 단원">07_29 단원</option><option value="07_30 단원">07_30 단원</option><option value="07_31 단원">07_31 단원</option><option value="07_32 단원">07_32 단원</option><option value="07_33 단원">07_33 단원</option><option value="07_34 단원">07_34 단원</option><option value="07_35 단원">07_35 단원</option><option value="07_36 단원">07_36 단원</option><option value="07_37 단원">07_37 단원</option><option value="07_38 단원">07_38 단원</option><option value="07_39 단원">07_39 단원</option><option value="07_40 단원">07_40 단원</option><option value="07_41 단원">07_41 단원</option><option value="07_42 단원">07_42 단원</option><option value="07_43 단원">07_43 단원</option><option value="07_44 단원">07_44 단원</option><option value="07_45 단원">07_45 단원</option><option value="07_46 단원">07_46 단원</option></select>
+</div>
+
+<div class="tabs">
+<button class="tab active" onclick="switchTab('meaning')">1. 뜻 쓰기 테스트 (라이트너 박스)</button>
+<button class="tab" onclick="switchTab('spelling-leitner')">2. 철자 쓰기 테스트 (라이트너 박스)</button>
+<button class="tab" onclick="switchTab('spelling')">3. 철자 맞추기 게임 (동적 배열)</button>
+</div>
+
+<div id="meaning" class="section active">
+<div class="btn-group">
+<button class="btn" style="background-color: #95a5a6;" onclick="initTable()">전체 초기화 (다시 하기)</button>
+<button class="btn" onclick="gradeStep1()">1차 채점하기 (B열)</button>
+<button class="btn btn-test" onclick="startStep2()">2차 테스트 시작 (B열 숨김)</button>
+<button class="btn" onclick="gradeStep2()">2차 채점하기 (E열)</button>
+<button class="btn btn-step3" onclick="startStep3()">3차 테스트 시작 (E열 숨김)</button>
+<button class="btn" onclick="gradeStep3()">3차 채점하기 (H열)</button>
+</div>
+
+<div class="table-responsive">
+<table>
+<thead>
+<tr>
+<th>A열 (단어)</th>
+<th>B열 (1차 뜻 쓰기)</th>
+<th>C열 (1차 연습장)</th>
+<th>D열 (2차 대기열)</th>
+<th>E열 (2차 뜻 쓰기)</th>
+<th>F열 (2차 연습장)</th>
+<th>G열 (3차 대기열)</th>
+<th>H열 (3차 뜻 쓰기)</th>
+</tr>
+</thead>
+<tbody id="word-table-body"><tr>
+<td><strong>attitude</strong></td>
+<td><input type="text" id="b_0" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_0" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_0" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_0" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_0" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>altitude</strong></td>
+<td><input type="text" id="b_1" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_1" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_1" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_1" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_1" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>latitude</strong></td>
+<td><input type="text" id="b_2" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_2" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_2" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_2" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_2" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>longitude</strong></td>
+<td><input type="text" id="b_3" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_3" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_3" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_3" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_3" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>gratitude</strong></td>
+<td><input type="text" id="b_4" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_4" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_4" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_4" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_4" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>aptitude</strong></td>
+<td><input type="text" id="b_5" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_5" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_5" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_5" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_5" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>affect</strong></td>
+<td><input type="text" id="b_6" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_6" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_6" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_6" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_6" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>affect (Point)</strong></td>
+<td><input type="text" id="b_7" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_7" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_7" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_7" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_7" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>affection</strong></td>
+<td><input type="text" id="b_8" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_8" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_8" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_8" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_8" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>affectionate</strong></td>
+<td><input type="text" id="b_9" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_9" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_9" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_9" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_9" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>priceless</strong></td>
+<td><input type="text" id="b_10" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_10" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_10" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_10" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_10" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>invaluable</strong></td>
+<td><input type="text" id="b_11" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_11" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_11" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_11" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_11" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>valueless</strong></td>
+<td><input type="text" id="b_12" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_12" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_12" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_12" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_12" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>worthless</strong></td>
+<td><input type="text" id="b_13" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_13" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_13" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_13" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_13" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>appliance</strong></td>
+<td><input type="text" id="b_14" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_14" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_14" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_14" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_14" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>appliance (단수)</strong></td>
+<td><input type="text" id="b_15" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_15" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_15" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_15" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_15" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>appliance (복수)</strong></td>
+<td><input type="text" id="b_16" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_16" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_16" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_16" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_16" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>intelligent</strong></td>
+<td><input type="text" id="b_17" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_17" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_17" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_17" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_17" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>intelligible</strong></td>
+<td><input type="text" id="b_18" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_18" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_18" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_18" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_18" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>unintelligible</strong></td>
+<td><input type="text" id="b_19" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_19" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_19" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_19" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_19" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>lie</strong></td>
+<td><input type="text" id="b_20" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_20" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_20" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_20" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_20" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>lie (-lay-lain)</strong></td>
+<td><input type="text" id="b_21" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_21" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_21" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_21" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_21" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>lay (-laid-laid)</strong></td>
+<td><input type="text" id="b_22" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_22" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_22" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_22" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_22" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>causal</strong></td>
+<td><input type="text" id="b_23" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_23" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_23" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_23" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_23" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>casual</strong></td>
+<td><input type="text" id="b_24" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_24" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_24" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_24" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_24" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>casually</strong></td>
+<td><input type="text" id="b_25" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_25" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_25" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_25" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_25" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>reap</strong></td>
+<td><input type="text" id="b_26" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_26" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_26" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_26" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_26" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>rip</strong></td>
+<td><input type="text" id="b_27" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_27" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_27" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_27" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_27" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>leap</strong></td>
+<td><input type="text" id="b_28" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_28" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_28" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_28" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_28" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>rib</strong></td>
+<td><input type="text" id="b_29" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_29" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_29" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_29" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_29" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>ripe</strong></td>
+<td><input type="text" id="b_30" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_30" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_30" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_30" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_30" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>lip</strong></td>
+<td><input type="text" id="b_31" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_31" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_31" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_31" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_31" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr><tr>
+<td><strong>terrible</strong></td>
+<td><input type="text" id="b_32" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_32" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_32" disabled="" placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_32" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_32" disabled="" placeholder="G열 단어 3차 테스트"></td>
+</tr></tbody>
+</table>
+</div>
+</div>
+
+<div id="spelling-leitner" class="section">
+<div class="btn-group">
+<button class="btn" style="background-color: #95a5a6;" onclick="initSpellTable()">전체 초기화 (다시 하기)</button>
+<button class="btn" onclick="gradeSpellStep1()">1차 채점하기 (B열)</button>
+<button class="btn btn-test" onclick="startSpellStep2()">2차 테스트 시작 (B열 숨김)</button>
+<button class="btn" onclick="gradeSpellStep2()">2차 채점하기 (E열)</button>
+<button class="btn btn-step3" onclick="startSpellStep3()">3차 테스트 시작 (E열 숨김)</button>
+<button class="btn" onclick="gradeSpellStep3()">3차 채점하기 (H열)</button>
+</div>
+
+<div class="table-responsive">
+<table>
+<thead>
+<tr>
+<th>A열 (뜻)</th>
+<th>B열 (1차 철자 쓰기)</th>
+<th>C열 (1차 연습장)</th>
+<th>D열 (2차 대기열)</th>
+<th>E열 (2차 철자 쓰기)</th>
+<th>F열 (2차 연습장)</th>
+<th>G열 (3차 대기열)</th>
+<th>H열 (3차 철자 쓰기)</th>
+</tr>
+</thead>
+<tbody id="spell-table-body"><tr>
+<td><strong>n. 태도, 입장</strong></td>
+<td><input type="text" id="sb_0" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_0" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_0" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_0" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_0" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 고도, 높이</strong></td>
+<td><input type="text" id="sb_1" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_1" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_1" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_1" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_1" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 위도</strong></td>
+<td><input type="text" id="sb_2" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_2" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_2" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_2" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_2" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 경도</strong></td>
+<td><input type="text" id="sb_3" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_3" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_3" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_3" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_3" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 고마움, 감사</strong></td>
+<td><input type="text" id="sb_4" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_4" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_4" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_4" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_4" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 소질, 적성</strong></td>
+<td><input type="text" id="sb_5" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_5" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_5" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_5" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_5" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 영향을 미치다</strong></td>
+<td><input type="text" id="sb_6" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_6" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_6" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_6" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_6" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 감정을 유발하다, n. 감정</strong></td>
+<td><input type="text" id="sb_7" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_7" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_7" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_7" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_7" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 애정, 애착</strong></td>
+<td><input type="text" id="sb_8" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_8" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_8" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_8" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_8" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 다정한, 애정 어린</strong></td>
+<td><input type="text" id="sb_9" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_9" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_9" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_9" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_9" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 값을 매길 수 없는, 대단히 귀중한</strong></td>
+<td><input type="text" id="sb_10" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_10" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_10" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_10" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_10" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 매우 유용한, 귀중한</strong></td>
+<td><input type="text" id="sb_11" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_11" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_11" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_11" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_11" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 가치 없는, 하찮은</strong></td>
+<td><input type="text" id="sb_12" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_12" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_12" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_12" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_12" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 가치 없는, 쓸모없는</strong></td>
+<td><input type="text" id="sb_13" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_13" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_13" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_13" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_13" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. (가정용) 기기, 장치</strong></td>
+<td><input type="text" id="sb_14" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_14" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_14" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_14" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_14" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 적용, 응용</strong></td>
+<td><input type="text" id="sb_15" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_15" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_15" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_15" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_15" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. (가정용) 기기</strong></td>
+<td><input type="text" id="sb_16" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_16" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_16" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_16" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_16" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 지적인, 똑똑한, 지능의</strong></td>
+<td><input type="text" id="sb_17" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_17" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_17" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_17" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_17" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 이해할 수 있는</strong></td>
+<td><input type="text" id="sb_18" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_18" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_18" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_18" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_18" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 이해할 수 없는</strong></td>
+<td><input type="text" id="sb_19" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_19" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_19" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_19" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_19" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 거짓말하다, n. 거짓말</strong></td>
+<td><input type="text" id="sb_20" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_20" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_20" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_20" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_20" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 누워 있다, 눕다, 놓여 있다</strong></td>
+<td><input type="text" id="sb_21" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_21" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_21" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_21" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_21" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 놓다, 두다, (알을) 낳다</strong></td>
+<td><input type="text" id="sb_22" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_22" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_22" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_22" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_22" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 인과 관계의</strong></td>
+<td><input type="text" id="sb_23" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_23" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_23" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_23" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_23" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 무심한, 대충하는, 건성의, 격식을 차리지 않는</strong></td>
+<td><input type="text" id="sb_24" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_24" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_24" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_24" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_24" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adv. 무심하게, 가볍게</strong></td>
+<td><input type="text" id="sb_25" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_25" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_25" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_25" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_25" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. (성과·이익 등을) 거두다, 얻다, 수확하다</strong></td>
+<td><input type="text" id="sb_26" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_26" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_26" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_26" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_26" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 찢다</strong></td>
+<td><input type="text" id="sb_27" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_27" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_27" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_27" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_27" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>v. 뛰다, 도약하다, n. 도약</strong></td>
+<td><input type="text" id="sb_28" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_28" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_28" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_28" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_28" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 갈비</strong></td>
+<td><input type="text" id="sb_29" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_29" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_29" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_29" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_29" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 익은</strong></td>
+<td><input type="text" id="sb_30" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_30" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_30" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_30" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_30" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>n. 입술</strong></td>
+<td><input type="text" id="sb_31" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_31" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_31" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_31" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_31" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr><tr>
+<td><strong>adj. 무서운, 끔찍한</strong></td>
+<td><input type="text" id="sb_32" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_32" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_32" disabled="" placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_32" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_32" disabled="" placeholder="G열 철자 3차 테스트"></td>
+</tr></tbody>
+</table>
+</div>
+</div>
+
+<div id="spelling" class="section">
+<h2>철자 조합 게임 테스트</h2>
+<p>제공된 뜻을 보고, 6개의 박스 중 올바른 알파벳을 순서대로 클릭하세요.</p>
+<div id="spelling-game">
+<div id="target-meaning">뜻이 여기에 표시됩니다</div>
+<div id="typed-word"></div>
+<div class="letter-boxes" id="letter-container">
+</div>
+<p id="spelling-progress" style="color:#7f8c8d;"></p>
+<button class="btn" onclick="nextSpellingWord()">다음 단어 (Skip)</button>
+</div>
+</div>
+
+<div class="submit-section" id="submit-section" style="display: block;">
+    <button class="btn btn-step3" onclick="submitToGoogleForm()" style="width: 100%; padding: 20px; font-size: 20px; font-weight: bold; background-color: #8e44ad;">🚀 오늘 학습 결과 구글폼으로 전송하기</button>
+</div>
+
+</div>
+
+<script>
+// =========================================================================
+// [시스템 모드 및 구글 폼 전송 설정]
+// =========================================================================
+let isStudentMode = true;
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxv2yogbyv8tuJgXW6B2VEaDXuSKl4BksBiREvucTjWp7Ga6EFmB5Az_2XUAmdtFLas/exec"; 
+
+// ★ 구글 폼 연동 엔드포인트 URL 및 항목 ID 설정 (원장님이 반드시 수정해야 하는 곳!)
+const GOOGLE_FORM_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfqF1UuZXmZNsKr6i4y2LBxF8wIbychWIEDk7iXbb0JRezraA/formResponse";
+const FORM_ENTRIES = {
+    seat: "entry.111111111", // 실제 '좌석번호' entry ID로 변경 요망
+    name: "entry.222222222", // 실제 '학생 이름' entry ID로 변경 요망
+    unit: "entry.333333333", // 실제 '학습 단원' entry ID로 변경 요망
+    t1: "entry.444444444",   // 실제 '1차 소요시간' entry ID로 변경 요망
+    t2: "entry.555555555",   // 실제 '2차 소요시간' entry ID로 변경 요망
+    t3: "entry.666666666",   // 실제 '3차 소요시간' entry ID로 변경 요망
+    t4: "entry.777777777",   // 실제 '4차 소요시간' entry ID로 변경 요망
+    wrongNotes: "entry.888888888" // 실제 '오답노트' entry ID로 변경 요망
+};
+
+// 실시간 데이터 수집용 변수
+let wrongWordsSet = new Set();
+let step1Start = 0, time1 = 0;
+let step2Start = 0, time2 = 0;
+let step3Start = 0, time3 = 0;
+
+// =========================================================================
+// [미전송 데이터 관리 (로컬 스토리지 백업) 로직]
+// =========================================================================
+function saveUnsentData() {
+    if(!isStudentMode) return;
+    localStorage.setItem('unsent_unit', document.getElementById('unit-select').value);
+    localStorage.setItem('unsent_time1', time1);
+    localStorage.setItem('unsent_time2', time2);
+    localStorage.setItem('unsent_time3', time3);
+    localStorage.setItem('unsent_wrongNotes', JSON.stringify(Array.from(wrongWordsSet)));
+}
+
+function clearUnsentData() {
+    localStorage.removeItem('unsent_unit');
+    localStorage.removeItem('unsent_time1');
+    localStorage.removeItem('unsent_time2');
+    localStorage.removeItem('unsent_time3');
+    localStorage.removeItem('unsent_wrongNotes');
+}
+
+function checkUnsentData() {
+    if (!isStudentMode) return false;
+    const unsentTime1 = parseInt(localStorage.getItem('unsent_time1') || 0);
+    const unsentTime2 = parseInt(localStorage.getItem('unsent_time2') || 0);
+    const unsentTime3 = parseInt(localStorage.getItem('unsent_time3') || 0);
+    
+    if (unsentTime1 > 0 || unsentTime2 > 0 || unsentTime3 > 0) {
+        document.getElementById('unsent-data-overlay').style.display = 'flex';
+        return true;
+    }
+    return false;
+}
+
+function submitUnsentData() {
+    const formData = new FormData();
+    formData.append(FORM_ENTRIES.seat, localStorage.getItem('student_seat') || '미기재');
+    formData.append(FORM_ENTRIES.name, localStorage.getItem('student_name') || '미기재');
+    formData.append(FORM_ENTRIES.unit, localStorage.getItem('unsent_unit') || '알수없음');
+    
+    formData.append(FORM_ENTRIES.t1, Math.floor(parseInt(localStorage.getItem('unsent_time1') || 0) / 1000) + "초");
+    formData.append(FORM_ENTRIES.t2, Math.floor(parseInt(localStorage.getItem('unsent_time2') || 0) / 1000) + "초");
+    formData.append(FORM_ENTRIES.t3, Math.floor(parseInt(localStorage.getItem('unsent_time3') || 0) / 1000) + "초");
+    formData.append(FORM_ENTRIES.t4, "0초"); 
+    
+    let wrongNotesArr = JSON.parse(localStorage.getItem('unsent_wrongNotes') || "[]");
+    let wrongNotesStr = wrongNotesArr.join(", ");
+    formData.append(FORM_ENTRIES.wrongNotes, wrongNotesStr ? wrongNotesStr : "오답 없음");
+
+    const btn = document.getElementById('unsent-submit-btn');
+    const origText = btn.innerText;
+    btn.innerText = "전송 중...";
+    btn.disabled = true;
+
+    fetch(GOOGLE_FORM_ACTION_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+    }).then(() => {
+        alert("✅ 미전송 학습 결과가 성공적으로 전송되었습니다!\n새로운 학습을 시작합니다.");
+        clearUnsentData();
+        document.getElementById('unsent-data-overlay').style.display = 'none';
+    }).catch(err => {
+        alert("통신 오류로 인해 전송에 실패했습니다.");
+        console.error(err);
+    }).finally(() => {
+        btn.innerText = origText;
+        btn.disabled = false;
+    });
+}
+
+function discardUnsentData() {
+    if (confirm("이전 학습 기록을 정말 삭제하시겠습니까? (이 작업은 되돌릴 수 없습니다)")) {
+        clearUnsentData();
+        document.getElementById('unsent-data-overlay').style.display = 'none';
+        alert("이전 학습 기록이 삭제되었습니다. 새로운 학습을 시작합니다.");
+    }
+}
+
+// 구글 폼 제출 로직 (Solution C)
+function submitToGoogleForm() {
+    if(!isStudentMode) {
+        alert("이 기능은 학생 모드에서만 작동합니다.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append(FORM_ENTRIES.seat, localStorage.getItem('student_seat') || '미기재');
+    formData.append(FORM_ENTRIES.name, localStorage.getItem('student_name') || '미기재');
+    formData.append(FORM_ENTRIES.unit, document.getElementById('unit-select').value);
+    
+    formData.append(FORM_ENTRIES.t1, Math.floor(time1 / 1000) + "초");
+    formData.append(FORM_ENTRIES.t2, Math.floor(time2 / 1000) + "초");
+    formData.append(FORM_ENTRIES.t3, Math.floor(time3 / 1000) + "초");
+    formData.append(FORM_ENTRIES.t4, "0초"); // 현재 3차 테스트까지만 존재
+    
+    let wrongNotesStr = Array.from(wrongWordsSet).join(", ");
+    formData.append(FORM_ENTRIES.wrongNotes, wrongNotesStr ? wrongNotesStr : "오답 없음");
+
+    fetch(GOOGLE_FORM_ACTION_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+    }).then(() => {
+        alert("✅ 오늘의 학습 결과가 선생님께 성공적으로 전송되었습니다!");
+        clearUnsentData();
+        wrongWordsSet.clear();
+        time1 = 0; time2 = 0; time3 = 0;
+        step1Start = Date.now();
+        saveUnsentData(); 
+    }).catch(err => {
+        alert("통신 오류로 인해 전송에 실패했습니다.");
+        console.error(err);
+    });
+}
+
+// =========================================================================
+// [학생 전용 로그인 로직]
+// =========================================================================
+function checkStudentAuth() {
+    const overlay = document.getElementById('student-login-overlay');
+    overlay.style.display = 'flex'; 
+    document.getElementById('submit-section').style.display = 'block'; 
+    
+    const savedName = localStorage.getItem('student_name');
+    const savedSeat = localStorage.getItem('student_seat');
+
+    if (savedName) {
+        document.getElementById('stu-seat').style.display = 'none'; 
+        document.getElementById('stu-name').style.display = 'none'; 
+        
+        let seatPrefix = (savedSeat && savedSeat !== "null" && savedSeat.trim() !== "") ? `[${savedSeat}] ` : "";
+        
+        document.getElementById('login-desc').innerText = `${seatPrefix}${savedName} 학생, 환영합니다! 비밀번호를 입력하여 학습을 시작하세요.`;
+        document.getElementById('reset-user-btn').style.display = 'block';
+    }
+}
+
+function resetUser() {
+    localStorage.removeItem('student_name');
+    localStorage.removeItem('student_seat');
+    document.getElementById('stu-seat').style.display = 'block';
+    document.getElementById('stu-name').style.display = 'block';
+    document.getElementById('stu-seat').value = '';
+    document.getElementById('stu-name').value = '';
+    document.getElementById('stu-pw').value = '';
+    document.getElementById('login-desc').innerText = '최초 로그인 시 좌석번호, 이름, 비밀번호를 입력하세요. 이후엔 비밀번호만 입력합니다.';
+    document.getElementById('reset-user-btn').style.display = 'none';
+}
+
+async function studentLogin() {
+    const savedName = localStorage.getItem('student_name');
+    const savedSeat = localStorage.getItem('student_seat');
+    
+    const inputSeat = document.getElementById('stu-seat').value.trim();
+    const inputName = document.getElementById('stu-name').value.trim();
+    const inputPw = document.getElementById('stu-pw').value.trim();
+    
+    const finalName = savedName ? savedName : inputName;
+    const finalSeat = savedSeat ? savedSeat : inputSeat;
+
+    if (!finalName || !inputPw || (!savedName && !inputSeat)) {
+        alert("좌석번호, 이름, 비밀번호를 모두 올바르게 입력해주세요.");
+        return;
+    }
+
+    const cleanUrl = GAS_URL.trim();
+    if (cleanUrl === "여기에_구글_앱스_스크립트_배포_URL을_입력하세요" || cleanUrl === "") {
+        alert("시스템 오류: 관리자가 통신 URL(GAS_URL)을 설정하지 않았습니다.");
+        return;
+    }
+
+    const loginBtn = document.getElementById('login-btn');
+    const originalBtnText = loginBtn.innerText;
+    loginBtn.innerText = "로그인 확인 중...";
+    loginBtn.disabled = true;
+
+    try {
+        const requestUrl = `${cleanUrl}?name=${encodeURIComponent(finalName)}&password=${encodeURIComponent(inputPw)}`;
+        const response = await fetch(requestUrl, {
+            method: 'GET',
+            redirect: 'follow' 
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP 통신 에러: ${response.status}`);
+        }
+
+        const result = await response.text();
+
+        if (result.trim() === "SUCCESS") {
+            if (!savedName) {
+                localStorage.setItem('student_name', finalName);
+                localStorage.setItem('student_seat', finalSeat);
+            }
+            alert(`${finalName} 학생, 인증되었습니다! 학습을 시작합니다.`);
+            document.getElementById('student-login-overlay').style.display = 'none';
+            updateUnitSelectDropdown(); 
+
+            checkUnsentData();
+
+        } else {
+            alert("이름 또는 비밀번호가 일치하지 않습니다. 시트에 등록된 정보인지 다시 확인해주세요.");
+        }
+    } catch (error) {
+        console.error("로그인 통신 오류 상세 내역:", error);
+        alert(`서버 통신 오류가 발생했습니다.\n\n[관리자 확인 사항]\n1. 앱스 스크립트 코드가 doPost가 아닌 doGet으로 작성되었는지 확인.\n2. 앱스 스크립트 배포 시 반드시 [새 배포]를 눌러 갱신했는지 확인.\n3. 액세스 권한이 '모든 사용자(Anyone)'인지 확인.\n\n(오류 메시지: ${error.message})`);
+    } finally {
+        loginBtn.innerText = originalBtnText;
+        loginBtn.disabled = false;
+    }
+}
+
+
+// =========================================================================
+// [데이터 구성]
+// =========================================================================
+let wordDataByUnit = {
+  "01_1 단원": [
+    {
+      "word": "attitude",
+      "meanings": [
+        "n. 태도",
+        "입장"
+      ]
+    },
+    {
+      "word": "altitude",
+      "meanings": [
+        "n. 고도",
+        "높이"
+      ]
+    },
+    {
+      "word": "latitude",
+      "meanings": [
+        "n. 위도"
+      ]
+    },
+    {
+      "word": "longitude",
+      "meanings": [
+        "n. 경도"
+      ]
+    },
+    {
+      "word": "gratitude",
+      "meanings": [
+        "n. 고마움",
+        "감사"
+      ]
+    },
+    {
+      "word": "aptitude",
+      "meanings": [
+        "n. 소질",
+        "적성"
+      ]
+    },
+    {
+      "word": "affect",
+      "meanings": [
+        "v. 영향을 미치다"
+      ]
+    },
+    {
+      "word": "affect (Point)",
+      "meanings": [
+        "v. 감정을 유발하다",
+        "n. 감정"
+      ]
+    },
+    {
+      "word": "affection",
+      "meanings": [
+        "n. 애정",
+        "애착"
+      ]
+    },
+    {
+      "word": "affectionate",
+      "meanings": [
+        "adj. 다정한",
+        "애정 어린"
+      ]
+    },
+    {
+      "word": "priceless",
+      "meanings": [
+        "adj. 값을 매길 수 없는",
+        "대단히 귀중한"
+      ]
+    },
+    {
+      "word": "invaluable",
+      "meanings": [
+        "adj. 매우 유용한",
+        "귀중한"
+      ]
+    },
+    {
+      "word": "valueless",
+      "meanings": [
+        "adj. 가치 없는",
+        "하찮은"
+      ]
+    },
+    {
+      "word": "worthless",
+      "meanings": [
+        "adj. 가치 없는",
+        "쓸모없는"
+      ]
+    },
+    {
+      "word": "appliance",
+      "meanings": [
+        "n. (가정용) 기기",
+        "장치"
+      ]
+    },
+    {
+      "word": "appliance (단수)",
+      "meanings": [
+        "n. 적용",
+        "응용"
+      ]
+    },
+    {
+      "word": "appliance (복수)",
+      "meanings": [
+        "n. (가정용) 기기"
+      ]
+    },
+    {
+      "word": "intelligent",
+      "meanings": [
+        "adj. 지적인",
+        "똑똑한",
+        "지능의"
+      ]
+    },
+    {
+      "word": "intelligible",
+      "meanings": [
+        "adj. 이해할 수 있는"
+      ]
+    },
+    {
+      "word": "unintelligible",
+      "meanings": [
+        "adj. 이해할 수 없는"
+      ]
+    },
+    {
+      "word": "lie",
+      "meanings": [
+        "v. 거짓말하다",
+        "n. 거짓말"
+      ]
+    },
+    {
+      "word": "lie (-lay-lain)",
+      "meanings": [
+        "v. 누워 있다",
+        "눕다",
+        "놓여 있다"
+      ]
+    },
+    {
+      "word": "lay (-laid-laid)",
+      "meanings": [
+        "v. 놓다",
+        "두다",
+        "(알을) 낳다"
+      ]
+    },
+    {
+      "word": "causal",
+      "meanings": [
+        "adj. 인과 관계의"
+      ]
+    },
+    {
+      "word": "casual",
+      "meanings": [
+        "adj. 무심한",
+        "대충하는",
+        "건성의",
+        "격식을 차리지 않는"
+      ]
+    },
+    {
+      "word": "casually",
+      "meanings": [
+        "adv. 무심하게",
+        "가볍게"
+      ]
+    },
+    {
+      "word": "reap",
+      "meanings": [
+        "v. (성과·이익 등을) 거두다",
+        "얻다",
+        "수확하다"
+      ]
+    },
+    {
+      "word": "rip",
+      "meanings": [
+        "v. 찢다"
+      ]
+    },
+    {
+      "word": "leap",
+      "meanings": [
+        "v. 뛰다",
+        "도약하다",
+        "n. 도약"
+      ]
+    },
+    {
+      "word": "rib",
+      "meanings": [
+        "n. 갈비"
+      ]
+    },
+    {
+      "word": "ripe",
+      "meanings": [
+        "adj. 익은"
+      ]
+    },
+    {
+      "word": "lip",
+      "meanings": [
+        "n. 입술"
+      ]
+    },
+    {
+      "word": "terrible",
+      "meanings": [
+        "adj. 무서운",
+        "끔찍한"
+      ]
+    }
+  ],
+  "01_2 단원": [
+    {
+      "word": "terrific",
+      "meanings": [
+        "adj. 아주 좋은",
+        "멋진",
+        "훌륭한",
+        "굉장한 (+)"
+      ]
+    },
+    {
+      "word": "access",
+      "meanings": [
+        "n. (장소로의) 입장",
+        "접근권",
+        "접촉 기회",
+        "v. 접속하다",
+        "접근하다"
+      ]
+    },
+    {
+      "word": "assess",
+      "meanings": [
+        "v. (특성·자질 등을) 재다[가늠하다]",
+        "평가[사정]하다"
+      ]
+    },
+    {
+      "word": "assessment",
+      "meanings": [
+        "n. 평가"
+      ]
+    },
+    {
+      "word": "public",
+      "meanings": [
+        "n. 일반인",
+        "adj. 대중의",
+        "일반인의"
+      ]
+    },
+    {
+      "word": "publication",
+      "meanings": [
+        "n. 출판",
+        "발행",
+        "발표",
+        "출판물"
+      ]
+    },
+    {
+      "word": "publicity",
+      "meanings": [
+        "n. 매스컴[언론]의 관심[주목]",
+        "홍보[광고]"
+      ]
+    },
+    {
+      "word": "publicize",
+      "meanings": [
+        "v. (일반 사람들에게) 알리다",
+        "광고[홍보]하다"
+      ]
+    },
+    {
+      "word": "public relation (PR)",
+      "meanings": [
+        "n. 홍보[선전] 활동"
+      ]
+    },
+    {
+      "word": "alter",
+      "meanings": [
+        "v. 변하다",
+        "바꾸다"
+      ]
+    },
+    {
+      "word": "alternate",
+      "meanings": [
+        "adj. 번갈아 발생하는",
+        "v. 번갈아 발생하다"
+      ]
+    },
+    {
+      "word": "alternative",
+      "meanings": [
+        "n. 대안",
+        "adj. 대체 가능한",
+        "대안이 되는",
+        "새로운"
+      ]
+    },
+    {
+      "word": "alternatively",
+      "meanings": [
+        "adv. 그 대신에",
+        "그렇지 않으면"
+      ]
+    },
+    {
+      "word": "root",
+      "meanings": [
+        "n. 뿌리"
+      ]
+    },
+    {
+      "word": "route",
+      "meanings": [
+        "n. 길",
+        "노선",
+        "경로"
+      ]
+    },
+    {
+      "word": "stationary",
+      "meanings": [
+        "adj. 움직이지 않는",
+        "정지된",
+        "변하지 않는",
+        "비유동적인"
+      ]
+    },
+    {
+      "word": "stationery",
+      "meanings": [
+        "n. 문구류",
+        "문방구"
+      ]
+    },
+    {
+      "word": "spontaneously",
+      "meanings": [
+        "adv. 자발적으로",
+        "자연스럽게",
+        "자연히 일어나는"
+      ]
+    },
+    {
+      "word": "simultaneously",
+      "meanings": [
+        "adv. 동시에"
+      ]
+    },
+    {
+      "word": "comprehensive",
+      "meanings": [
+        "adj. 포괄적인",
+        "종합적인"
+      ]
+    },
+    {
+      "word": "comprehensible",
+      "meanings": [
+        "adj. 이해할 수 있는"
+      ]
+    },
+    {
+      "word": "incomprehensible",
+      "meanings": [
+        "adj. 이해할 수 없는"
+      ]
+    },
+    {
+      "word": "curve",
+      "meanings": [
+        "v. 곡선으로 나아가다",
+        "n. 곡선"
+      ]
+    },
+    {
+      "word": "curb",
+      "meanings": [
+        "v. 억제[제한]하다"
+      ]
+    },
+    {
+      "word": "carve",
+      "meanings": [
+        "v. 조각하다",
+        "새기다"
+      ]
+    },
+    {
+      "word": "mix",
+      "meanings": [
+        "v. 섞다",
+        "섞이다"
+      ]
+    },
+    {
+      "word": "mixed",
+      "meanings": [
+        "adj. (좋고 나쁜 것이) 뒤섞인",
+        "(의견·생각 등이) 엇갈리는"
+      ]
+    },
+    {
+      "word": "occupy",
+      "meanings": [
+        "v. (공간·지역·시간을) 차지하다",
+        "전념하다"
+      ]
+    },
+    {
+      "word": "be occupied with A",
+      "meanings": [
+        "A에 사로잡히다",
+        "열중해 있다"
+      ]
+    },
+    {
+      "word": "preoccupation",
+      "meanings": [
+        "n. (어떤 생각·걱정에) 사로잡힘",
+        "집착",
+        "뇌리를 사로잡고 있는 생각"
+      ]
+    },
+    {
+      "word": "struggle",
+      "meanings": [
+        "v. 투쟁[고투]하다",
+        "몸부림치다",
+        "허우적[버둥]거리다",
+        "애쓰다"
+      ]
+    },
+    {
+      "word": "strive",
+      "meanings": [
+        "v. 분투하다 (긍정적으로 열심히 노력하는 이미지)"
+      ]
+    }
+  ],
+  "02_1 단원": [
+    {
+      "word": "vacuum",
+      "meanings": [
+        "n. 진공(상태)",
+        "공백",
+        "v. 진공청소기로 청소하다"
+      ]
+    },
+    {
+      "word": "vacuum (상징적)",
+      "meanings": [
+        "isolated 상태 (외부와 단절된 상태)"
+      ]
+    },
+    {
+      "word": "myth",
+      "meanings": [
+        "n. 신화"
+      ]
+    },
+    {
+      "word": "myth (다른 뜻)",
+      "meanings": [
+        "n. (많은 사람들의) 근거 없는 믿음",
+        "사회적 통념"
+      ]
+    },
+    {
+      "word": "alien",
+      "meanings": [
+        "n. 외계인",
+        "우주인",
+        "외국인"
+      ]
+    },
+    {
+      "word": "alien (다른 뜻)",
+      "meanings": [
+        "adj. 이질적인",
+        "낯선",
+        "맞지 않는",
+        "외국의",
+        "이국의"
+      ]
+    },
+    {
+      "word": "alienate",
+      "meanings": [
+        "v. 소원하게 [멀어지게] 만들다",
+        "소외감을 느끼게 하다"
+      ]
+    },
+    {
+      "word": "alienation",
+      "meanings": [
+        "n. 소외",
+        "멀리함"
+      ]
+    },
+    {
+      "word": "weigh",
+      "meanings": [
+        "v. 무게[체중]가...이다",
+        "무게[체중]를 달다"
+      ]
+    },
+    {
+      "word": "weigh (다른 뜻)",
+      "meanings": [
+        "v. 따져 보다",
+        "저울질하다",
+        "심사숙고하다",
+        "중요하다"
+      ]
+    },
+    {
+      "word": "inform",
+      "meanings": [
+        "v. 알리다",
+        "통지하다",
+        "정보를 주다"
+      ]
+    },
+    {
+      "word": "informed + 명사",
+      "meanings": [
+        "(특정 주제·상황에 대해) 잘[많이] 아는",
+        "정보통인"
+      ]
+    },
+    {
+      "word": "incident",
+      "meanings": [
+        "n. 일어난 일",
+        "사건",
+        "사고",
+        "adj. (부수적으로) 발생하기 쉬운"
+      ]
+    },
+    {
+      "word": "incidental",
+      "meanings": [
+        "adj. 부수적인",
+        "우연히 일어나는"
+      ]
+    },
+    {
+      "word": "manipulate",
+      "meanings": [
+        "v. 조종하다",
+        "조작하다",
+        "다루다"
+      ]
+    },
+    {
+      "word": "manipulation",
+      "meanings": [
+        "n. 조종",
+        "조작"
+      ]
+    },
+    {
+      "word": "option",
+      "meanings": [
+        "n. 선택",
+        "(기기의) 옵션",
+        "선택 과목"
+      ]
+    },
+    {
+      "word": "optional",
+      "meanings": [
+        "adj. 필수가 아닌 선택적인"
+      ]
+    },
+    {
+      "word": "submit",
+      "meanings": [
+        "v. 제출하다"
+      ]
+    },
+    {
+      "word": "submit A",
+      "meanings": [
+        "A를 제출하다"
+      ]
+    },
+    {
+      "word": "submit to A",
+      "meanings": [
+        "A에게 항복",
+        "굴복하다"
+      ]
+    },
+    {
+      "word": "yield",
+      "meanings": [
+        "v. 산출하다",
+        "생산하다",
+        "n. 수확량",
+        "산출(물)"
+      ]
+    },
+    {
+      "word": "yield A",
+      "meanings": [
+        "A를 산출",
+        "생산하다"
+      ]
+    },
+    {
+      "word": "yield to A",
+      "meanings": [
+        "A에게 양보",
+        "항복",
+        "굴복하다"
+      ]
+    },
+    {
+      "word": "fascinate",
+      "meanings": [
+        "v. 유혹하다",
+        "매혹하다",
+        "마음을 빼앗다 (+)"
+      ]
+    },
+    {
+      "word": "tempt",
+      "meanings": [
+        "v. 유혹하다",
+        "(관심을) 끌다 (-)"
+      ]
+    },
+    {
+      "word": "develop",
+      "meanings": [
+        "v. 개발하다"
+      ]
+    },
+    {
+      "word": "develop (사람, 생명)",
+      "meanings": [
+        "v. 성장하다",
+        "발달[발전]하다"
+      ]
+    },
+    {
+      "word": "develop (부정적)",
+      "meanings": [
+        "v. 발생하다",
+        "생기다"
+      ]
+    },
+    {
+      "word": "development",
+      "meanings": [
+        "n. 개발",
+        "발달"
+      ]
+    },
+    {
+      "word": "developed countries",
+      "meanings": [
+        "n. 선진국"
+      ]
+    },
+    {
+      "word": "developing countries",
+      "meanings": [
+        "n. 개발 도상국 (= poor countries)"
+      ]
+    },
+    {
+      "word": "suspect",
+      "meanings": [
+        "v. 의심하다"
+      ]
+    }
+  ],
+  "02_2 단원": [
+    {
+      "word": "suspect (Point)",
+      "meanings": [
+        "v. (그럴거라) 의심하다"
+      ]
+    },
+    {
+      "word": "doubt",
+      "meanings": [
+        "v. (아닐거라) 의심하다"
+      ]
+    },
+    {
+      "word": "adopt",
+      "meanings": [
+        "v. 입양하다",
+        "쓰다[취하다]",
+        "채택하다"
+      ]
+    },
+    {
+      "word": "adopt 본질적 의미",
+      "meanings": [
+        "기존에 없었던 새로운 것을 갖게 되는 것"
+      ]
+    },
+    {
+      "word": "adapt",
+      "meanings": [
+        "v. 맞추다[조정하다]",
+        "적응하다"
+      ]
+    },
+    {
+      "word": "adapt A",
+      "meanings": [
+        "A를 적응시키다"
+      ]
+    },
+    {
+      "word": "adapt to A",
+      "meanings": [
+        "A로 적응하다"
+      ]
+    },
+    {
+      "word": "adapt (다른 뜻)",
+      "meanings": [
+        "v. 각색하다"
+      ]
+    },
+    {
+      "word": "adaptation",
+      "meanings": [
+        "n. 각색"
+      ]
+    },
+    {
+      "word": "adjust",
+      "meanings": [
+        "v. 조정[조절]하다",
+        "적응하다 (= adapt)"
+      ]
+    },
+    {
+      "word": "adjust",
+      "meanings": [
+        "v. 조정[조절]하다",
+        "적응하다"
+      ]
+    },
+    {
+      "word": "adjustment",
+      "meanings": [
+        "n. 조정",
+        "적응"
+      ]
+    },
+    {
+      "word": "faith",
+      "meanings": [
+        "n. 믿음[신뢰]",
+        "신념"
+      ]
+    },
+    {
+      "word": "faithful",
+      "meanings": [
+        "adj. 충실한",
+        "충직한",
+        "신의 있는",
+        "사실대로의",
+        "원본에 충실한"
+      ]
+    },
+    {
+      "word": "bother",
+      "meanings": [
+        "v. 괴롭히다",
+        "귀찮게 하다"
+      ]
+    },
+    {
+      "word": "bother (다른 뜻)",
+      "meanings": [
+        "v. [흔히 부정문·의문문에 쓰여] 신경 쓰다",
+        "애를 쓰다"
+      ]
+    },
+    {
+      "word": "tolerate",
+      "meanings": [
+        "v. 참다",
+        "용인하다"
+      ]
+    },
+    {
+      "word": "tolerance",
+      "meanings": [
+        "n. 용인",
+        "관용",
+        "아량",
+        "내성"
+      ]
+    },
+    {
+      "word": "intolerance",
+      "meanings": [
+        "n. 불관용",
+        "과민증",
+        "알레르기"
+      ]
+    },
+    {
+      "word": "tolerant",
+      "meanings": [
+        "adj. 관대한",
+        "잘 견디는"
+      ]
+    },
+    {
+      "word": "intolerant",
+      "meanings": [
+        "adj. 너그럽지 못한",
+        "편협한",
+        "못 먹는[과민증이 있는]"
+      ]
+    },
+    {
+      "word": "exist",
+      "meanings": [
+        "v. 존재하다"
+      ]
+    },
+    {
+      "word": "existing A",
+      "meanings": [
+        "adj. 기존의 A"
+      ]
+    },
+    {
+      "word": "irony",
+      "meanings": [
+        "n. 아이러니",
+        "역설적인 점[상황]",
+        "반어법"
+      ]
+    },
+    {
+      "word": "irony 포인트",
+      "meanings": [
+        "(+)->(-) or (-)->(+)"
+      ]
+    },
+    {
+      "word": "paradox",
+      "meanings": [
+        "n. 역설적인 사람[것",
+        "상황]",
+        "역설",
+        "패러독스"
+      ]
+    },
+    {
+      "word": "paradox 포인트",
+      "meanings": [
+        "(+)->(-) or (-)->(+)"
+      ]
+    },
+    {
+      "word": "assume",
+      "meanings": [
+        "v. 가정하다",
+        "추정[상정]하다"
+      ]
+    },
+    {
+      "word": "assume + S + V",
+      "meanings": [
+        "(사실이 아닐 수도 있는 것을 사실이라) 가정하다"
+      ]
+    },
+    {
+      "word": "assume + 명사",
+      "meanings": [
+        "~을 취하다",
+        "가지다"
+      ]
+    },
+    {
+      "word": "assumption",
+      "meanings": [
+        "n. 가정",
+        "가설",
+        "인수"
+      ]
+    },
+    {
+      "word": "compromise",
+      "meanings": [
+        "n. 타협[절충]",
+        "v. 타협하다"
+      ]
+    },
+    {
+      "word": "negotiate",
+      "meanings": [
+        "v. 협상[교섭]하다",
+        "합의하다"
+      ]
+    }
+  ],
+  "02_3 단원": [
+    {
+      "word": "compromise 뉘앙스",
+      "meanings": [
+        "(-) 부정적 의미 (굽히다[양보하다]",
+        "훼손시키다",
+        "위태롭게 하다)"
+      ]
+    },
+    {
+      "word": "biology",
+      "meanings": [
+        "n. 생물학",
+        "생명 작용[활동]"
+      ]
+    },
+    {
+      "word": "biology 상징적 의미",
+      "meanings": [
+        "타고남",
+        "내재됨",
+        "유전적"
+      ]
+    },
+    {
+      "word": "exclusive",
+      "meanings": [
+        "adj. 배타적인",
+        "독점적인"
+      ]
+    },
+    {
+      "word": "exclusively",
+      "meanings": [
+        "adv. 배타적으로",
+        "독점적으로",
+        "오로지"
+      ]
+    },
+    {
+      "word": "prescribe",
+      "meanings": [
+        "v. 처방을 내리다",
+        "처방하다",
+        "처방전을 쓰다"
+      ]
+    },
+    {
+      "word": "prescribe (다른 뜻)",
+      "meanings": [
+        "v. 규정하다",
+        "지시하다",
+        "명령하다"
+      ]
+    },
+    {
+      "word": "presume",
+      "meanings": [
+        "v. 추정하다[여기다",
+        "생각하다]"
+      ]
+    },
+    {
+      "word": "presume 숨은 뜻",
+      "meanings": [
+        "v. (실질적인 증거는 없지만 사실일 것이라고) 추정하다"
+      ]
+    },
+    {
+      "word": "mere",
+      "meanings": [
+        "adj. 그저",
+        "겨우 ~의",
+        "단지 ~에 불과한"
+      ]
+    },
+    {
+      "word": "merely",
+      "meanings": [
+        "adv. 한낱",
+        "그저",
+        "단지"
+      ]
+    },
+    {
+      "word": "static",
+      "meanings": [
+        "adj. (변화·움직임이 없이) 고정된[고정적인]",
+        "정적인",
+        "변하지 않는"
+      ]
+    },
+    {
+      "word": "static electricity",
+      "meanings": [
+        "n. 정전기"
+      ]
+    },
+    {
+      "word": "displace",
+      "meanings": [
+        "v. 대신[대체]하다",
+        "옮겨 놓다"
+      ]
+    },
+    {
+      "word": "displace 이미지",
+      "meanings": [
+        "어떤 것이 위치한 것에 dis를 걸어버리는 이미지 (`쫓아내다`)"
+      ]
+    },
+    {
+      "word": "seize",
+      "meanings": [
+        "v. 와락[꽉] 붙잡다[움켜잡다]",
+        "포착하다",
+        "이해하다"
+      ]
+    },
+    {
+      "word": "siege",
+      "meanings": [
+        "n. 포위(작전)"
+      ]
+    },
+    {
+      "word": "orient",
+      "meanings": [
+        "v. (...을) 지향하게 하다",
+        "맞추다",
+        "자기 위치를 알다",
+        "적응하다"
+      ]
+    },
+    {
+      "word": "orientate",
+      "meanings": [
+        "v. orient와 같은 단어"
+      ]
+    },
+    {
+      "word": "orientation",
+      "meanings": [
+        "n. 방향성",
+        "성향",
+        "경향"
+      ]
+    },
+    {
+      "word": "disorient(ate)",
+      "meanings": [
+        "v. 갈피를 못 잡게 하다",
+        "어리둥절하게 하다",
+        "방향 감각을 혼란시키다"
+      ]
+    },
+    {
+      "word": "#NAME?",
+      "meanings": [
+        "~ 지향적인",
+        "~ 중심적인"
+      ]
+    },
+    {
+      "word": "identify",
+      "meanings": [
+        "v. 식별하다"
+      ]
+    },
+    {
+      "word": "identify 이미지",
+      "meanings": [
+        "확인하다"
+      ]
+    },
+    {
+      "word": "identity",
+      "meanings": [
+        "n. 신원",
+        "정체성"
+      ]
+    },
+    {
+      "word": "identification",
+      "meanings": [
+        "n. 신원 확인",
+        "신분증"
+      ]
+    },
+    {
+      "word": "ID",
+      "meanings": [
+        "n. 신분증명서",
+        "신분증"
+      ]
+    },
+    {
+      "word": "identify with A",
+      "meanings": [
+        "A와 동일시하다"
+      ]
+    },
+    {
+      "word": "reconsider",
+      "meanings": [
+        "v. 재고하다"
+      ]
+    },
+    {
+      "word": "reconsider 본질",
+      "meanings": [
+        "기존의 결정 상황에 대해 `변화`가 있어야 한다는 이미지 (생각을 바꾸다)"
+      ]
+    },
+    {
+      "word": "reconsideration",
+      "meanings": [
+        "n. 재고",
+        "재심"
+      ]
+    },
+    {
+      "word": "counterpart",
+      "meanings": [
+        "n. 상응하는 것",
+        "상대방",
+        "관계자",
+        "등가물"
+      ]
+    },
+    {
+      "word": "counterpart 본질",
+      "meanings": [
+        "다른 장소나 상황에서 동일한 지위나 기능을 갖는 상대",
+        "대응 관계 대상"
+      ]
+    },
+    {
+      "word": "mobilize",
+      "meanings": [
+        "v. 동원되다",
+        "동원하다"
+      ]
+    },
+    {
+      "word": "mobilize 확장 의미",
+      "meanings": [
+        "(어떤 행동을 위해) 준비시키다",
+        "활용하다",
+        "작동하다"
+      ]
+    },
+    {
+      "word": "initiate",
+      "meanings": [
+        "v. 개시되게 하다",
+        "시작하다"
+      ]
+    },
+    {
+      "word": "initiative",
+      "meanings": [
+        "n. 진취성",
+        "주도권",
+        "계획"
+      ]
+    }
+  ],
+  "03_1 단원": [
+    {
+      "word": "establish",
+      "meanings": [
+        "v. 설립[설정]하다",
+        "(제도·법률 따위를) 정하다",
+        "수립하다"
+      ]
+    },
+    {
+      "word": "established",
+      "meanings": [
+        "adj. 인정받는",
+        "확실히 자리를 잡은",
+        "저명한",
+        "존경받는"
+      ]
+    },
+    {
+      "word": "even",
+      "meanings": [
+        "adv. ~조차도",
+        "심지어",
+        "훨씬"
+      ]
+    },
+    {
+      "word": "even (Point)",
+      "meanings": [
+        "adj. 평평한",
+        "반반한",
+        "고른[일정한]",
+        "공평한",
+        "짝수의"
+      ]
+    },
+    {
+      "word": "uneven",
+      "meanings": [
+        "adj. 평평하지 않은",
+        "균등하지 않은",
+        "공평하지 않은"
+      ]
+    },
+    {
+      "word": "evenly",
+      "meanings": [
+        "adv. 고르게",
+        "균등하게",
+        "대등하게"
+      ]
+    },
+    {
+      "word": "unevenly",
+      "meanings": [
+        "adv. 평탄하지 않게",
+        "고르지 않게",
+        "균형 잡히지 않게"
+      ]
+    },
+    {
+      "word": "odd",
+      "meanings": [
+        "adj. 이상한",
+        "특이한"
+      ]
+    },
+    {
+      "word": "odd (Point)",
+      "meanings": [
+        "adj. 홀수의"
+      ]
+    },
+    {
+      "word": "even",
+      "meanings": [
+        "adj. 짝수의"
+      ]
+    },
+    {
+      "word": "odds",
+      "meanings": [
+        "n. 가능성",
+        "확률",
+        "고난",
+        "역경"
+      ]
+    },
+    {
+      "word": "mean",
+      "meanings": [
+        "v. 의미하다"
+      ]
+    },
+    {
+      "word": "mean (Point)",
+      "meanings": [
+        "adj. 못된",
+        "비열한"
+      ]
+    },
+    {
+      "word": "mean (Point)",
+      "meanings": [
+        "n. 중간",
+        "평균"
+      ]
+    },
+    {
+      "word": "means",
+      "meanings": [
+        "n. 수단"
+      ]
+    },
+    {
+      "word": "claim",
+      "meanings": [
+        "v. 주장하다",
+        "요구하다",
+        "n. 주장",
+        "요구"
+      ]
+    },
+    {
+      "word": "claim (Point)",
+      "meanings": [
+        "v. (목숨을) 앗아가다",
+        "차지하다",
+        "(소유권을) 주장하다"
+      ]
+    },
+    {
+      "word": "subject",
+      "meanings": [
+        "n. 주제",
+        "문제",
+        "학과",
+        "과목",
+        "연구[실험] 대상",
+        "피험자"
+      ]
+    },
+    {
+      "word": "subject (Point)",
+      "meanings": [
+        "adj. ~될[당할",
+        "걸릴] 수 있는",
+        "~을 받아야 하는"
+      ]
+    },
+    {
+      "word": "contemporary",
+      "meanings": [
+        "adj. 동시대의",
+        "당대의"
+      ]
+    },
+    {
+      "word": "contemporary (Point)",
+      "meanings": [
+        "n. (어떤 사람과) 동년배[동시대인]"
+      ]
+    },
+    {
+      "word": "demand",
+      "meanings": [
+        "n. 요구(사항)",
+        "수요",
+        "v. 요구하다"
+      ]
+    },
+    {
+      "word": "demanding",
+      "meanings": [
+        "adj. 힘든",
+        "어려운",
+        "고된",
+        "까다로운 (-)"
+      ]
+    },
+    {
+      "word": "consequence",
+      "meanings": [
+        "n. 결과"
+      ]
+    },
+    {
+      "word": "consequential",
+      "meanings": [
+        "adj. 중요한"
+      ]
+    },
+    {
+      "word": "scale",
+      "meanings": [
+        "n. 규모[범위]"
+      ]
+    },
+    {
+      "word": "scale (Point)",
+      "meanings": [
+        "n. 축척",
+        "등급",
+        "저울",
+        "(물고기) 비늘",
+        "v. 비늘을 벗기다"
+      ]
+    },
+    {
+      "word": "provide",
+      "meanings": [
+        "v. 제공하다",
+        "공급하다",
+        "준비하다"
+      ]
+    },
+    {
+      "word": "providing/provided",
+      "meanings": [
+        "conj. 만약 ~라면 (If ~)"
+      ]
+    },
+    {
+      "word": "provision",
+      "meanings": [
+        "n. 공급",
+        "준비"
+      ]
+    },
+    {
+      "word": "rather",
+      "meanings": [
+        "adv. 꽤",
+        "약간",
+        "상당히",
+        "오히려",
+        "차라리"
+      ]
+    },
+    {
+      "word": "rather (연결어)",
+      "meanings": [
+        "(앞에 부정적 뉘앙스를 달고 나옴)"
+      ]
+    },
+    {
+      "word": "A rather than B",
+      "meanings": [
+        "B가 아니라 A"
+      ]
+    }
+  ],
+  "03_2 단원": [
+    {
+      "word": "instead",
+      "meanings": [
+        "adv. 대신에"
+      ]
+    },
+    {
+      "word": "Instead of A~, B~",
+      "meanings": [
+        "A 대신에 B (A에서 B로의 인과",
+        "변화 파악)"
+      ]
+    },
+    {
+      "word": "game",
+      "meanings": [
+        "n. 게임",
+        "경기",
+        "시합"
+      ]
+    },
+    {
+      "word": "game (Point)",
+      "meanings": [
+        "n. 사냥감"
+      ]
+    },
+    {
+      "word": "motor",
+      "meanings": [
+        "n. 자동차",
+        "승용차",
+        "n. 모터",
+        "전동기"
+      ]
+    },
+    {
+      "word": "motor (Point)",
+      "meanings": [
+        "adj. (근육에 의한) 운동의",
+        "운동 신경의"
+      ]
+    },
+    {
+      "word": "rate",
+      "meanings": [
+        "n. 비",
+        "비율"
+      ]
+    },
+    {
+      "word": "rate (Point)",
+      "meanings": [
+        "n. 속도"
+      ]
+    },
+    {
+      "word": "rate (Point)",
+      "meanings": [
+        "v. 등급을 매기다",
+        "평가하다"
+      ]
+    },
+    {
+      "word": "contain",
+      "meanings": [
+        "v. 함유하다",
+        "포함하다",
+        "들어 있다"
+      ]
+    },
+    {
+      "word": "contain (Point)",
+      "meanings": [
+        "v. 억제하다",
+        "참다"
+      ]
+    },
+    {
+      "word": "vehicle",
+      "meanings": [
+        "n. 차량",
+        "탈것",
+        "운송 수단"
+      ]
+    },
+    {
+      "word": "vehicle (Point)",
+      "meanings": [
+        "n. 수단 [매개체]"
+      ]
+    },
+    {
+      "word": "flavor",
+      "meanings": [
+        "n. 풍미",
+        "향미",
+        "맛",
+        "v. 맛을 내다"
+      ]
+    },
+    {
+      "word": "flavor (Point)",
+      "meanings": [
+        "n. 특징",
+        "특색"
+      ]
+    },
+    {
+      "word": "celebrity",
+      "meanings": [
+        "n. 유명 인사",
+        "유명인"
+      ]
+    },
+    {
+      "word": "celebrity (Point)",
+      "meanings": [
+        "n. 명성 (불가산 명사로 쓰일 때)"
+      ]
+    },
+    {
+      "word": "virtual",
+      "meanings": [
+        "adj. 사실상의",
+        "가상의"
+      ]
+    },
+    {
+      "word": "virtual (Point)",
+      "meanings": [
+        "(문맥에 따라 `실제` or `가상`)"
+      ]
+    },
+    {
+      "word": "virtually",
+      "meanings": [
+        "adv. 사실상",
+        "거의",
+        "가상으로"
+      ]
+    },
+    {
+      "word": "scarce",
+      "meanings": [
+        "adj. 부족한",
+        "드문",
+        "희소한"
+      ]
+    },
+    {
+      "word": "scarcity",
+      "meanings": [
+        "n. 부족",
+        "결핍",
+        "희소"
+      ]
+    },
+    {
+      "word": "scarcely",
+      "meanings": [
+        "adv. 거의 ~않다"
+      ]
+    },
+    {
+      "word": "grant",
+      "meanings": [
+        "v. 승인[허락]하다",
+        "주다"
+      ]
+    },
+    {
+      "word": "grant (Point)",
+      "meanings": [
+        "n. 보조금",
+        "장학금"
+      ]
+    },
+    {
+      "word": "take A for granted",
+      "meanings": [
+        "A를 당연시 여기다"
+      ]
+    },
+    {
+      "word": "Granted (that) S V~",
+      "meanings": [
+        "S가 V인 것은 인정해 (반전을 기대하며 읽기)"
+      ]
+    },
+    {
+      "word": "engage",
+      "meanings": [
+        "v. 관여하다",
+        "약속하다",
+        "약혼하다",
+        "관계를 맺다"
+      ]
+    },
+    {
+      "word": "engage A",
+      "meanings": [
+        "A의 관심",
+        "흥미를 끌다",
+        "사로잡다"
+      ]
+    },
+    {
+      "word": "engage in A",
+      "meanings": [
+        "A에 관여",
+        "참여하다"
+      ]
+    },
+    {
+      "word": "engaging",
+      "meanings": [
+        "adj. 매력적인 (= attractive)"
+      ]
+    },
+    {
+      "word": "colony",
+      "meanings": [
+        "n. 식민지"
+      ]
+    },
+    {
+      "word": "colony (Point)",
+      "meanings": [
+        "n. (동·식물의) 군집",
+        "집단"
+      ]
+    }
+  ],
+  "03_3 단원": [
+    {
+      "word": "settle",
+      "meanings": [
+        "v. 정착하다"
+      ]
+    },
+    {
+      "word": "settle (Point)",
+      "meanings": [
+        "v. 해결하다",
+        "합의를 보다"
+      ]
+    },
+    {
+      "word": "dispute",
+      "meanings": [
+        "n. 분쟁",
+        "논란",
+        "v. 분쟁을 벌이다",
+        "이의를 제기하다"
+      ]
+    },
+    {
+      "word": "undisputed",
+      "meanings": [
+        "adj. 반박의 여지가 없는",
+        "모두가 인정하는"
+      ]
+    },
+    {
+      "word": "context",
+      "meanings": [
+        "n. 맥락",
+        "문맥",
+        "환경",
+        "전후 사정"
+      ]
+    },
+    {
+      "word": "context 본질",
+      "meanings": [
+        "어떤 것과 연관된 `상황`"
+      ]
+    },
+    {
+      "word": "break",
+      "meanings": [
+        "v. 깨어지다",
+        "깨다",
+        "부수다",
+        "고장 내다"
+      ]
+    },
+    {
+      "word": "break (Point)",
+      "meanings": [
+        "v. (뉴스가) 알려지다",
+        "터지다",
+        "소식을 알리다"
+      ]
+    },
+    {
+      "word": "relevant",
+      "meanings": [
+        "adj. 관련 있는"
+      ]
+    },
+    {
+      "word": "relevant (Point)",
+      "meanings": [
+        "adj. 의의가 있는[유의미한]",
+        "중요한",
+        "적절한"
+      ]
+    },
+    {
+      "word": "appreciate",
+      "meanings": [
+        "v. 진가를 알아보다",
+        "고마워하다",
+        "환영하다"
+      ]
+    },
+    {
+      "word": "appreciate 이미지",
+      "meanings": [
+        "높이 평가하다"
+      ]
+    },
+    {
+      "word": "except",
+      "meanings": [
+        "prep. ~을 제외하고는",
+        "v. 제외하다"
+      ]
+    },
+    {
+      "word": "exceptional",
+      "meanings": [
+        "adj. 이례적일 정도로 우수한",
+        "특출한",
+        "특별한"
+      ]
+    },
+    {
+      "word": "exceptionally",
+      "meanings": [
+        "adv. 유난히",
+        "특별히"
+      ]
+    },
+    {
+      "word": "credit",
+      "meanings": [
+        "n. 신용 거래",
+        "신용도"
+      ]
+    },
+    {
+      "word": "A be credited to B",
+      "meanings": [
+        "A를 B의 공으로 믿다"
+      ]
+    },
+    {
+      "word": "A be attributed to B",
+      "meanings": [
+        "A를 B의 공으로 믿다"
+      ]
+    },
+    {
+      "word": "credit 확장 의미",
+      "meanings": [
+        "n. 공로",
+        "업적",
+        "인정",
+        "학점"
+      ]
+    },
+    {
+      "word": "frequency",
+      "meanings": [
+        "n. 빈도"
+      ]
+    },
+    {
+      "word": "frequency (Point)",
+      "meanings": [
+        "n. (소리·전자파 등의) 주파수"
+      ]
+    },
+    {
+      "word": "count",
+      "meanings": [
+        "v. 수를 세다",
+        "계산하다",
+        "포함시키다"
+      ]
+    },
+    {
+      "word": "count (Point)",
+      "meanings": [
+        "v. 중요하다"
+      ]
+    },
+    {
+      "word": "count on",
+      "meanings": [
+        "~을 믿다",
+        "~을 의지하다"
+      ]
+    },
+    {
+      "word": "count A as B",
+      "meanings": [
+        "A를 B라고 간주하다"
+      ]
+    },
+    {
+      "word": "count A in B",
+      "meanings": [
+        "A를 B에 끼워주다"
+      ]
+    },
+    {
+      "word": "case",
+      "meanings": [
+        "n. (특정한 상황의) 경우",
+        "소송",
+        "상자"
+      ]
+    },
+    {
+      "word": "the case",
+      "meanings": [
+        "사실",
+        "진실"
+      ]
+    },
+    {
+      "word": "make the case",
+      "meanings": [
+        "주장을 하다"
+      ]
+    },
+    {
+      "word": "inquire",
+      "meanings": [
+        "v. 물어보다",
+        "탐구하다"
+      ]
+    },
+    {
+      "word": "inquiry",
+      "meanings": [
+        "n. 질문",
+        "조사",
+        "연구",
+        "탐구"
+      ]
+    },
+    {
+      "word": "positive",
+      "meanings": [
+        "adj. 긍정의"
+      ]
+    },
+    {
+      "word": "positive (Point)",
+      "meanings": [
+        "adj. (검사 결과가) 양성(반응)의",
+        "적극적인"
+      ]
+    }
+  ],
+  "03_4 단원": [
+    {
+      "word": "negative",
+      "meanings": [
+        "adj. 부정의",
+        "음성의",
+        "소극적인"
+      ]
+    },
+    {
+      "word": "chemistry",
+      "meanings": [
+        "n. 화학",
+        "화학적 성질"
+      ]
+    },
+    {
+      "word": "chemistry (Point)",
+      "meanings": [
+        "n. 교감",
+        "(사람 사이의) 끌림"
+      ]
+    },
+    {
+      "word": "cell",
+      "meanings": [
+        "n. 세포"
+      ]
+    },
+    {
+      "word": "cell (Point)",
+      "meanings": [
+        "n. 작은방",
+        "독방",
+        "칸"
+      ]
+    },
+    {
+      "word": "contract",
+      "meanings": [
+        "n. 계약(서)",
+        "v. 계약하다"
+      ]
+    },
+    {
+      "word": "contract (Point)",
+      "meanings": [
+        "v. 줄어들다",
+        "수축하다",
+        "(병에) 걸리다"
+      ]
+    },
+    {
+      "word": "register",
+      "meanings": [
+        "v. 등록하다",
+        "n. 등록",
+        "등록기"
+      ]
+    },
+    {
+      "word": "register (Point)",
+      "meanings": [
+        "v. 나타내다[표하다]",
+        "알아채다",
+        "인식하다"
+      ]
+    },
+    {
+      "word": "agent",
+      "meanings": [
+        "n. 중개인",
+        "대리인",
+        "요원",
+        "물질"
+      ]
+    },
+    {
+      "word": "agent (Point)",
+      "meanings": [
+        "n. 행위자",
+        "주체"
+      ]
+    },
+    {
+      "word": "agency",
+      "meanings": [
+        "n. 대리점",
+        "대행사",
+        "행위"
+      ]
+    },
+    {
+      "word": "figure",
+      "meanings": [
+        "n. 모양",
+        "형태"
+      ]
+    },
+    {
+      "word": "figure (Point)",
+      "meanings": [
+        "n. 수치",
+        "도표",
+        "(등장)인물"
+      ]
+    },
+    {
+      "word": "figure out",
+      "meanings": [
+        "v. ~을 이해하다[알아내다]"
+      ]
+    },
+    {
+      "word": "account",
+      "meanings": [
+        "n. 계좌",
+        "계정"
+      ]
+    },
+    {
+      "word": "account (Point)",
+      "meanings": [
+        "n. 설명[이야기",
+        "말]",
+        "중요성",
+        "v. 간주하다"
+      ]
+    },
+    {
+      "word": "accountable",
+      "meanings": [
+        "adj. 책임이 있는",
+        "책임감을 느끼는"
+      ]
+    },
+    {
+      "word": "unaccountable",
+      "meanings": [
+        "adj. 책임을 질 필요가 없는",
+        "설명할 수 없는"
+      ]
+    },
+    {
+      "word": "take A into account",
+      "meanings": [
+        "A를 고려하다"
+      ]
+    },
+    {
+      "word": "account for A",
+      "meanings": [
+        "A를 차지하다"
+      ]
+    },
+    {
+      "word": "edge",
+      "meanings": [
+        "n. 끝",
+        "가장자리",
+        "모서리",
+        "경계"
+      ]
+    },
+    {
+      "word": "edge (Point)",
+      "meanings": [
+        "n. 이점",
+        "장점",
+        "우세",
+        "우위"
+      ]
+    },
+    {
+      "word": "reward",
+      "meanings": [
+        "n. 보상",
+        "v. 보상하다"
+      ]
+    },
+    {
+      "word": "rewarding",
+      "meanings": [
+        "adj. 보람이 있는",
+        "가치가 있는",
+        "만족감을 주는 (+)"
+      ]
+    },
+    {
+      "word": "substance",
+      "meanings": [
+        "n. 물질",
+        "실체"
+      ]
+    },
+    {
+      "word": "substantial",
+      "meanings": [
+        "adj. 실질적인",
+        "상당한"
+      ]
+    },
+    {
+      "word": "substantially",
+      "meanings": [
+        "adv. 상당히",
+        "많이",
+        "주로"
+      ]
+    },
+    {
+      "word": "originate",
+      "meanings": [
+        "v. ~에서 비롯하다",
+        "유래하다"
+      ]
+    },
+    {
+      "word": "original",
+      "meanings": [
+        "adj. 원래[본래]의",
+        "독창적인"
+      ]
+    },
+    {
+      "word": "originality",
+      "meanings": [
+        "n. 독창성"
+      ]
+    },
+    {
+      "word": "measure",
+      "meanings": [
+        "v. 측정하다",
+        "평가하다",
+        "n. 기준",
+        "단위"
+      ]
+    },
+    {
+      "word": "measure (Point)",
+      "meanings": [
+        "n. 조치[정책]"
+      ]
+    }
+  ],
+  "03_5 단원": [
+    {
+      "word": "address",
+      "meanings": [
+        "n. 주소",
+        "v. 주소를 쓰다"
+      ]
+    },
+    {
+      "word": "address (Point)",
+      "meanings": [
+        "v. (문제·상황 등을) 다루다",
+        "연설하다",
+        "n. 연설"
+      ]
+    },
+    {
+      "word": "represent",
+      "meanings": [
+        "v. 대표하다",
+        "해당하다",
+        "상징하다"
+      ]
+    },
+    {
+      "word": "represent (Point)",
+      "meanings": [
+        "v. 표현하다",
+        "나타내다",
+        "묘사[기술]하다"
+      ]
+    },
+    {
+      "word": "compound",
+      "meanings": [
+        "n. 혼합물",
+        "화합물",
+        "adj. 복합의",
+        "v. 혼합하다"
+      ]
+    },
+    {
+      "word": "compound (Point)",
+      "meanings": [
+        "v. 악화시키다",
+        "더 심각하게 만들다"
+      ]
+    },
+    {
+      "word": "observe",
+      "meanings": [
+        "v. ~을 보다",
+        "관찰하다",
+        "말하다"
+      ]
+    },
+    {
+      "word": "observe (Point)",
+      "meanings": [
+        "v. 지키다",
+        "준수하다"
+      ]
+    },
+    {
+      "word": "observation",
+      "meanings": [
+        "n. 관찰",
+        "논평"
+      ]
+    },
+    {
+      "word": "observance",
+      "meanings": [
+        "n. 준수"
+      ]
+    },
+    {
+      "word": "anchor",
+      "meanings": [
+        "n. 닻",
+        "v. 닻을 내리다",
+        "정박하다"
+      ]
+    },
+    {
+      "word": "anchor (Point)",
+      "meanings": [
+        "v. 고정시키다",
+        "(상징적) 타고난",
+        "내부에 고정된"
+      ]
+    },
+    {
+      "word": "margin",
+      "meanings": [
+        "n. 여백",
+        "차이",
+        "가장자리"
+      ]
+    },
+    {
+      "word": "margin (Point)",
+      "meanings": [
+        "n. 주변부",
+        "하찮은 것"
+      ]
+    },
+    {
+      "word": "marginal",
+      "meanings": [
+        "adj. 미미한",
+        "중요하지 않은",
+        "한계의",
+        "주변의"
+      ]
+    },
+    {
+      "word": "marginalize",
+      "meanings": [
+        "v. 무시하다",
+        "사회적으로 소외시키다"
+      ]
+    },
+    {
+      "word": "shallow",
+      "meanings": [
+        "adj. 깊이가 얕은",
+        "얇은"
+      ]
+    },
+    {
+      "word": "shallow (Point)",
+      "meanings": [
+        "adj. (추상적) 천박한",
+        "얄팍한",
+        "피상적인 (-)"
+      ]
+    },
+    {
+      "word": "respect",
+      "meanings": [
+        "n. 존경(심)",
+        "경의"
+      ]
+    },
+    {
+      "word": "respect (Point)",
+      "meanings": [
+        "n. 면",
+        "점",
+        "사항"
+      ]
+    },
+    {
+      "word": "respectable",
+      "meanings": [
+        "adj. 존경할 만한",
+        "훌륭한"
+      ]
+    },
+    {
+      "word": "respective",
+      "meanings": [
+        "adj. 각자의",
+        "각각의"
+      ]
+    },
+    {
+      "word": "respectively",
+      "meanings": [
+        "adv. 제각각",
+        "각자"
+      ]
+    },
+    {
+      "word": "property",
+      "meanings": [
+        "n. 재산",
+        "부동산"
+      ]
+    },
+    {
+      "word": "property (Point)",
+      "meanings": [
+        "n. 특성",
+        "속성"
+      ]
+    },
+    {
+      "word": "rough",
+      "meanings": [
+        "adj. 거친",
+        "난폭한"
+      ]
+    },
+    {
+      "word": "rough (Point)",
+      "meanings": [
+        "adj. 대충[대강] 한",
+        "대략적인 (=approximate)"
+      ]
+    },
+    {
+      "word": "successful",
+      "meanings": [
+        "adj. 성공한",
+        "성공적인"
+      ]
+    },
+    {
+      "word": "succeed",
+      "meanings": [
+        "v. 성공하다",
+        "계승하다"
+      ]
+    },
+    {
+      "word": "successive",
+      "meanings": [
+        "adj. 연속적인",
+        "연이은"
+      ]
+    },
+    {
+      "word": "succession",
+      "meanings": [
+        "n. 연속(물)",
+        "계속"
+      ]
+    },
+    {
+      "word": "custom",
+      "meanings": [
+        "n. 관습",
+        "풍습"
+      ]
+    },
+    {
+      "word": "customize",
+      "meanings": [
+        "v. 고객이 원하는 대로 만들다",
+        "주문 제작하다"
+      ]
+    }
+  ],
+  "03_6 단원": [
+    {
+      "word": "customization",
+      "meanings": [
+        "n. 맞춤화",
+        "주문에 따라 만듦"
+      ]
+    },
+    {
+      "word": "climate",
+      "meanings": [
+        "n. 기후"
+      ]
+    },
+    {
+      "word": "climate (Point)",
+      "meanings": [
+        "n. 분위기",
+        "풍조"
+      ]
+    },
+    {
+      "word": "pitch",
+      "meanings": [
+        "v. 내던지다",
+        "n. 투구"
+      ]
+    },
+    {
+      "word": "pitch (Point)",
+      "meanings": [
+        "n. 음의 높이"
+      ]
+    },
+    {
+      "word": "cast",
+      "meanings": [
+        "v. 던지다",
+        "빛을 발하다",
+        "n. 출연진",
+        "깁스"
+      ]
+    },
+    {
+      "word": "cast (Point)",
+      "meanings": [
+        "그림자를 드리우다",
+        "표를 던지다"
+      ]
+    },
+    {
+      "word": "score",
+      "meanings": [
+        "n. 득점",
+        "점수",
+        "v. 득점하다",
+        "채점하다"
+      ]
+    },
+    {
+      "word": "score (Point)",
+      "meanings": [
+        "n. 악보",
+        "(scores of) 아주 많은"
+      ]
+    },
+    {
+      "word": "integrate",
+      "meanings": [
+        "v. 통합시키다[되다]"
+      ]
+    },
+    {
+      "word": "integral",
+      "meanings": [
+        "adj. 필수적인",
+        "필요불가결한",
+        "통합된",
+        "내장된"
+      ]
+    },
+    {
+      "word": "integrity",
+      "meanings": [
+        "n. 온전함",
+        "진실성",
+        "청렴",
+        "무결함"
+      ]
+    },
+    {
+      "word": "mark",
+      "meanings": [
+        "n. 표시",
+        "흔적",
+        "v. 표시하다"
+      ]
+    },
+    {
+      "word": "mark (Point)",
+      "meanings": [
+        "v. 특징짓다"
+      ]
+    },
+    {
+      "word": "condition",
+      "meanings": [
+        "n. 컨디션",
+        "상태"
+      ]
+    },
+    {
+      "word": "condition (Point)",
+      "meanings": [
+        "n. 조건",
+        "v. 길들이다",
+        "조건화시키다"
+      ]
+    },
+    {
+      "word": "unconditional",
+      "meanings": [
+        "adj. 무조건적인"
+      ]
+    },
+    {
+      "word": "precondition",
+      "meanings": [
+        "n. 전제 조건"
+      ]
+    },
+    {
+      "word": "minute",
+      "meanings": [
+        "n. (정확한 어느) 순간"
+      ]
+    },
+    {
+      "word": "minute (Point)",
+      "meanings": [
+        "adj. 미세한 (=tiny)"
+      ]
+    },
+    {
+      "word": "invariable",
+      "meanings": [
+        "adj. 변함없는",
+        "변치 않는"
+      ]
+    },
+    {
+      "word": "invariably",
+      "meanings": [
+        "adv. 항상",
+        "언제나",
+        "예외 없이"
+      ]
+    },
+    {
+      "word": "question",
+      "meanings": [
+        "n. 질문",
+        "의문",
+        "v. 질문하다"
+      ]
+    },
+    {
+      "word": "question (Point)",
+      "meanings": [
+        "v. 의심하다",
+        "의문을 갖다",
+        "이의를 제기하다"
+      ]
+    },
+    {
+      "word": "immune",
+      "meanings": [
+        "adj. 특정 질병에 면역성이 있는"
+      ]
+    },
+    {
+      "word": "be immune to A",
+      "meanings": [
+        "A에 영향을 받지 않는"
+      ]
+    },
+    {
+      "word": "light",
+      "meanings": [
+        "n. 빛",
+        "adj. 밝은",
+        "가벼운",
+        "v. 불을 켜다"
+      ]
+    },
+    {
+      "word": "light (Point)",
+      "meanings": [
+        "n. 측면",
+        "관점 (in this light)"
+      ]
+    },
+    {
+      "word": "sound",
+      "meanings": [
+        "n. 소리",
+        "v. 소리가 나다"
+      ]
+    },
+    {
+      "word": "sound (Point)",
+      "meanings": [
+        "adj. 건전한",
+        "견고한",
+        "탄탄한",
+        "타당한 (+)"
+      ]
+    },
+    {
+      "word": "fine",
+      "meanings": [
+        "adj. 좋은",
+        "훌륭한"
+      ]
+    },
+    {
+      "word": "fine (Point)",
+      "meanings": [
+        "adj. 미세한",
+        "섬세한",
+        "정교한",
+        "순수한"
+      ]
+    },
+    {
+      "word": "fine (명사/동사)",
+      "meanings": [
+        "n. 벌금",
+        "v. 벌금을 부과하다"
+      ]
+    },
+    {
+      "word": "treat",
+      "meanings": [
+        "v. 대하다",
+        "다루다",
+        "취급하다"
+      ]
+    },
+    {
+      "word": "treat (Point)",
+      "meanings": [
+        "n. 특별한 선물",
+        "대접",
+        "한턱",
+        "v. 대접하다"
+      ]
+    },
+    {
+      "word": "retreat",
+      "meanings": [
+        "n. 후퇴",
+        "v. 후퇴하다"
+      ]
+    },
+    {
+      "word": "treaty",
+      "meanings": [
+        "n. 조약",
+        "협약"
+      ]
+    },
+    {
+      "word": "authorize",
+      "meanings": [
+        "v. 권한을 부여하다",
+        "허가하다",
+        "공인하다"
+      ]
+    },
+    {
+      "word": "author",
+      "meanings": [
+        "n. 저자 (공식적",
+        "권위 있는 사람)"
+      ]
+    },
+    {
+      "word": "authorized",
+      "meanings": [
+        "adj. 권한을 부여받은",
+        "공인된"
+      ]
+    },
+    {
+      "word": "mechanical",
+      "meanings": [
+        "adj. 기계적인",
+        "기계로 작동되는"
+      ]
+    },
+    {
+      "word": "mechanical (Point)",
+      "meanings": [
+        "adj. 영혼 없는",
+        "진심이 담기지 않은 (부정적 뉘앙스)"
+      ]
+    }
+  ],
+  "04_1 단원": [
+    {
+      "word": "be it A or B",
+      "meanings": [
+        "A이든 B이든"
+      ]
+    },
+    {
+      "word": "whether",
+      "meanings": [
+        "(be it은 whether를 줄인 것)"
+      ]
+    },
+    {
+      "word": "turn sour",
+      "meanings": [
+        "시어지다",
+        "틀어지다"
+      ]
+    },
+    {
+      "word": "turn sour (Point)",
+      "meanings": [
+        "원활하게 진행되지 않다",
+        "못쓰게 되다"
+      ]
+    },
+    {
+      "word": "contribute to",
+      "meanings": [
+        "~에 공헌하다",
+        "기여하다",
+        "기부하다"
+      ]
+    },
+    {
+      "word": "A contribute to B",
+      "meanings": [
+        "[인과관계] A → B (A가 원인이 되어 B에 기여함)"
+      ]
+    },
+    {
+      "word": "it follows that S V",
+      "meanings": [
+        "그렇기에 ~라는 이야기가 된다"
+      ]
+    },
+    {
+      "word": "it follows that",
+      "meanings": [
+        "자신의 주장이 타당하고 논리적임을 쓸 때 (필자의 주장)"
+      ]
+    },
+    {
+      "word": "at best/most",
+      "meanings": [
+        "기껏 해야 (부정적 뉘앙스)"
+      ]
+    },
+    {
+      "word": "at A`s best/most",
+      "meanings": [
+        "가장 좋은 상태에 (긍정적 뉘앙스)"
+      ]
+    },
+    {
+      "word": "at (the) worst",
+      "meanings": [
+        "최악의 경우에"
+      ]
+    },
+    {
+      "word": "at worst",
+      "meanings": [
+        "최악의 경우 (at best의 반대라고 긍정이 아님)"
+      ]
+    },
+    {
+      "word": "A is a creation of B",
+      "meanings": [
+        "A는 B의 창조물이다"
+      ]
+    },
+    {
+      "word": "A is a product of B",
+      "meanings": [
+        "A는 B의 산물이다"
+      ]
+    },
+    {
+      "word": "A is a function of B",
+      "meanings": [
+        "A는 B의 기능이다"
+      ]
+    },
+    {
+      "word": "not so much A as B",
+      "meanings": [
+        "A라기보다는 B"
+      ]
+    },
+    {
+      "word": "A < B",
+      "meanings": [
+        "A보다 B를 더 강조"
+      ]
+    },
+    {
+      "word": "other than A",
+      "meanings": [
+        "A를 제외하고",
+        "A와 다른",
+        "A가 아닌"
+      ]
+    },
+    {
+      "word": "other than",
+      "meanings": [
+        "except처럼 부정어의 역할"
+      ]
+    },
+    {
+      "word": "not A until B",
+      "meanings": [
+        "B할 때까지는 A가 아니다"
+      ]
+    },
+    {
+      "word": "not A until B (숨은 뜻)",
+      "meanings": [
+        "B하고 나서야 비로소 A하다 (사건의 순서: B → A)"
+      ]
+    },
+    {
+      "word": "removed from A",
+      "meanings": [
+        "A로부터 제거된"
+      ]
+    },
+    {
+      "word": "removed from A (Point)",
+      "meanings": [
+        "A로부터 멀리 떨어져 있다"
+      ]
+    },
+    {
+      "word": "A is a window into B",
+      "meanings": [
+        "A는 B를 들여다보는 창이다"
+      ]
+    },
+    {
+      "word": "attend to",
+      "meanings": [
+        "~에 주목하다",
+        "관심",
+        "흥미를 갖다",
+        "~를 처리하다"
+      ]
+    },
+    {
+      "word": "pay attention to",
+      "meanings": [
+        "같은 형태"
+      ]
+    },
+    {
+      "word": "aside from A",
+      "meanings": [
+        "A와는 별개로"
+      ]
+    },
+    {
+      "word": "Aside from A, B",
+      "meanings": [
+        "지금까지 서술해 온 A와 별개로 B는 ~이다 (A끝",
+        "B 시작)"
+      ]
+    },
+    {
+      "word": "Apart from A",
+      "meanings": [
+        "B도 같은 해석과 용법"
+      ]
+    },
+    {
+      "word": "confuse A with/and B",
+      "meanings": [
+        "A를 B와 혼동하다"
+      ]
+    },
+    {
+      "word": "confuse",
+      "meanings": [
+        "A와 B를 구별하지 못함 (A=B로 잘못 안다는 뜻)"
+      ]
+    },
+    {
+      "word": "be programmed to V",
+      "meanings": [
+        "~하도록 프로그램 되어 있다"
+      ]
+    },
+    {
+      "word": "be programmed (숨은 뜻)",
+      "meanings": [
+        "타고남",
+        "내재된"
+      ]
+    }
+  ],
+  "04_2 단원": [
+    {
+      "word": "distinction/gap between A and B",
+      "meanings": [
+        "A와 B 사이의 차이"
+      ]
+    },
+    {
+      "word": "A is to B as/what C is to D",
+      "meanings": [
+        "A와 B의 관계는 C와 D의 관계와 같다"
+      ]
+    },
+    {
+      "word": "as A(형/부) as B",
+      "meanings": [
+        "B만큼 A한~"
+      ]
+    },
+    {
+      "word": "as (문두에서 쓰일 때)",
+      "meanings": [
+        "양보의 의미 (~일지라도)"
+      ]
+    },
+    {
+      "word": "even so",
+      "meanings": [
+        "그렇기는 하지만",
+        "그럼에도 불구하고"
+      ]
+    },
+    {
+      "word": "even so (Point)",
+      "meanings": [
+        "[역접의 기능] (문장 삽입의 주요 포인트)"
+      ]
+    },
+    {
+      "word": "replace A with B",
+      "meanings": [
+        "A를 B로 대체하다",
+        "바꾸다"
+      ]
+    },
+    {
+      "word": "replace A with B (Point)",
+      "meanings": [
+        "기존의 A가 사라지고 B로 바뀐다"
+      ]
+    },
+    {
+      "word": "substitute A for B",
+      "meanings": [
+        "B를 A로 바꾸다"
+      ]
+    },
+    {
+      "word": "be absorbed in A",
+      "meanings": [
+        "A에 빠지다",
+        "열중하다",
+        "몰입하다"
+      ]
+    },
+    {
+      "word": "make a difference",
+      "meanings": [
+        "차이를 만들다",
+        "혁신을 만들다"
+      ]
+    },
+    {
+      "word": "make a difference 실질적 의미",
+      "meanings": [
+        "변화를 가져오다",
+        "영향을 주다",
+        "중요하다 (+)"
+      ]
+    },
+    {
+      "word": "as well",
+      "meanings": [
+        "또한",
+        "역시"
+      ]
+    },
+    {
+      "word": "should S V",
+      "meanings": [
+        "~이라면"
+      ]
+    },
+    {
+      "word": "should S V (Point)",
+      "meanings": [
+        "가정법 미래의 If 생략 도치"
+      ]
+    },
+    {
+      "word": "attribute A to B",
+      "meanings": [
+        "A를 B의 탓으로 돌리다",
+        "A를 B의 결과로 여기다"
+      ]
+    },
+    {
+      "word": "B → A",
+      "meanings": [
+        "[인과관계] B가 원인",
+        "A가 결과"
+      ]
+    },
+    {
+      "word": "attribute",
+      "meanings": [
+        "n. 특성",
+        "속성"
+      ]
+    },
+    {
+      "word": "draw on A",
+      "meanings": [
+        "A를 이용하다"
+      ]
+    },
+    {
+      "word": "draw",
+      "meanings": [
+        "v. 끌어당기다",
+        "사람의 마음",
+        "반응을 끌어내다"
+      ]
+    },
+    {
+      "word": "as far as",
+      "meanings": [
+        "~하는 한"
+      ]
+    },
+    {
+      "word": "as long as / so far as",
+      "meanings": [
+        "조건을 나타내는 동의어"
+      ]
+    },
+    {
+      "word": "argue for/against",
+      "meanings": [
+        "~에 찬성",
+        "반대론을 펴다"
+      ]
+    },
+    {
+      "word": "argument for/against",
+      "meanings": [
+        "~에 찬성",
+        "반대하는 주장"
+      ]
+    },
+    {
+      "word": "in need",
+      "meanings": [
+        "도움이 필요한",
+        "어려움에 처한",
+        "궁핍한"
+      ]
+    },
+    {
+      "word": "be on the same page",
+      "meanings": [
+        "~에 대해 이해하고 있는 내용이 같다"
+      ]
+    },
+    {
+      "word": "tap into",
+      "meanings": [
+        "~에 다가가다",
+        "~와 친구가 되다"
+      ]
+    },
+    {
+      "word": "tap into (다른 뜻)",
+      "meanings": [
+        "~을 활용",
+        "이용 하다"
+      ]
+    },
+    {
+      "word": "tap",
+      "meanings": [
+        "v. 가볍게 톡톡 두드리다",
+        "치다",
+        "n. 수도꼭지"
+      ]
+    },
+    {
+      "word": "in and of itself",
+      "meanings": [
+        "그것 자체로"
+      ]
+    },
+    {
+      "word": "having said that",
+      "meanings": [
+        "그렇기는 하지만"
+      ]
+    },
+    {
+      "word": "having said that (Point)",
+      "meanings": [
+        "however",
+        "nevertheless (논쟁 회피",
+        "우회)"
+      ]
+    },
+    {
+      "word": "Chances are S V",
+      "meanings": [
+        "~일 가능성이 있다",
+        "아마도 ~일 것이다"
+      ]
+    }
+  ],
+  "04_3 단원": [
+    {
+      "word": "take over",
+      "meanings": [
+        "~로부터 ~을 인계받다",
+        "탈취",
+        "장악하다"
+      ]
+    },
+    {
+      "word": "give rise to",
+      "meanings": [
+        "일으키다"
+      ]
+    },
+    {
+      "word": "give rise to (Point)",
+      "meanings": [
+        "원인을 제공하다 (A가 B를 야기하다)"
+      ]
+    },
+    {
+      "word": "take place",
+      "meanings": [
+        "발생하다",
+        "일어나다"
+      ]
+    },
+    {
+      "word": "happen",
+      "meanings": [
+        "자리를 차지하다`가 아님 (take my place 등과 구별)"
+      ]
+    },
+    {
+      "word": "lay off",
+      "meanings": [
+        "~를 그만 두다"
+      ]
+    },
+    {
+      "word": "lay off (다른 뜻)",
+      "meanings": [
+        "~를 해고시키다"
+      ]
+    },
+    {
+      "word": "layoff",
+      "meanings": [
+        "n. 해고"
+      ]
+    },
+    {
+      "word": "nothing but",
+      "meanings": [
+        "오직",
+        "그저",
+        "단지 ~일 뿐인"
+      ]
+    },
+    {
+      "word": "nothing but A",
+      "meanings": [
+        "A를 제외하고는 아무것도 없다 (only)"
+      ]
+    },
+    {
+      "word": "rule out",
+      "meanings": [
+        "제외시키다",
+        "배제하다",
+        "불가능하게 하다"
+      ]
+    },
+    {
+      "word": "exclude",
+      "meanings": [
+        "같은 문맥"
+      ]
+    },
+    {
+      "word": "in V-ing",
+      "meanings": [
+        "~함에 있어서"
+      ]
+    },
+    {
+      "word": "in V-ing (Point)",
+      "meanings": [
+        "~할 때 (as",
+        "when)"
+      ]
+    },
+    {
+      "word": "deal with",
+      "meanings": [
+        "~를 다루다"
+      ]
+    },
+    {
+      "word": "deal with 확장",
+      "meanings": [
+        "해결하다",
+        "대처하다"
+      ]
+    },
+    {
+      "word": "rob A of B",
+      "meanings": [
+        "A에게서 B를 빼앗다"
+      ]
+    },
+    {
+      "word": "strip A of B / deprive A of B",
+      "meanings": [
+        "같은 뜻 (A를 B에게서 빼앗다로 해석 금지)"
+      ]
+    },
+    {
+      "word": "cannot but + 동사원형",
+      "meanings": [
+        "~하지 않을 수 없다"
+      ]
+    },
+    {
+      "word": "cannot help + -ing",
+      "meanings": [
+        "~하지 않을 수 없다"
+      ]
+    },
+    {
+      "word": "cannot help but + 동사원형",
+      "meanings": [
+        "~하지 않을 수 없다 (시험 빈출)"
+      ]
+    },
+    {
+      "word": "give away",
+      "meanings": [
+        "거저 주다",
+        "나누어 주다"
+      ]
+    },
+    {
+      "word": "It is not that S V",
+      "meanings": [
+        "~때문이 아니다"
+      ]
+    },
+    {
+      "word": "It is that S V",
+      "meanings": [
+        "~때문이다"
+      ]
+    },
+    {
+      "word": "This is not to say that A",
+      "meanings": [
+        "그것이 A라는 것은 아니다"
+      ]
+    },
+    {
+      "word": "우회적 표현",
+      "meanings": [
+        "(하지만 여전히 그렇다는 뉘앙스 내포)"
+      ]
+    },
+    {
+      "word": "boil down to A",
+      "meanings": [
+        "A로 수렴하다",
+        "좁히다",
+        "결국 A가 되다"
+      ]
+    },
+    {
+      "word": "narrow down to A",
+      "meanings": [
+        "같은 뜻"
+      ]
+    },
+    {
+      "word": "(be) reduced to A",
+      "meanings": [
+        "같은 뜻"
+      ]
+    },
+    {
+      "word": "give way to",
+      "meanings": [
+        "길을 내어 주다",
+        "양보하다"
+      ]
+    },
+    {
+      "word": "A give way to B",
+      "meanings": [
+        "A가 B에게 길을 내어주다 (A<B)"
+      ]
+    }
+  ],
+  "05_1 단원": [
+    {
+      "word": "mover",
+      "meanings": [
+        "움직이는 사람[것]"
+      ]
+    },
+    {
+      "word": "mover 확장 의미",
+      "meanings": [
+        "원동력 (인과 관계의 원인)"
+      ]
+    },
+    {
+      "word": "outpace",
+      "meanings": [
+        "앞지르다",
+        "앞서다"
+      ]
+    },
+    {
+      "word": "A outpace B",
+      "meanings": [
+        "A > B (앞지름)"
+      ]
+    },
+    {
+      "word": "outnumber",
+      "meanings": [
+        "~보다 수가 많다",
+        "수적으로 우세하다"
+      ]
+    },
+    {
+      "word": "A outnumber B",
+      "meanings": [
+        "A > B"
+      ]
+    },
+    {
+      "word": "A is outnumbered by B",
+      "meanings": [
+        "A < B"
+      ]
+    },
+    {
+      "word": "base",
+      "meanings": [
+        "v. 근거를 두다",
+        "바탕을 두다",
+        "n. 기초",
+        "토대"
+      ]
+    },
+    {
+      "word": "base A on B",
+      "meanings": [
+        "[인과관계] A → B (A는 B에 기반함)"
+      ]
+    },
+    {
+      "word": "A on which B is based",
+      "meanings": [
+        "B → A (B는 A에 기반함)"
+      ]
+    },
+    {
+      "word": "A is a driving force in B",
+      "meanings": [
+        "A는 B의 원동력이다"
+      ]
+    },
+    {
+      "word": "driving force",
+      "meanings": [
+        "원동력",
+        "추진력 (A → B 인과관계)"
+      ]
+    },
+    {
+      "word": "determine",
+      "meanings": [
+        "v. 결정하다",
+        "알아내다"
+      ]
+    },
+    {
+      "word": "A determine B",
+      "meanings": [
+        "[인과관계] A → B"
+      ]
+    },
+    {
+      "word": "determinacy / determination",
+      "meanings": [
+        "n. 결정성",
+        "결정"
+      ]
+    },
+    {
+      "word": "determinant / determinism",
+      "meanings": [
+        "n. 결정 요인",
+        "결정론"
+      ]
+    },
+    {
+      "word": "distinguish",
+      "meanings": [
+        "v. 구별하다",
+        "구분하다",
+        "식별하다"
+      ]
+    },
+    {
+      "word": "distinguish A from B",
+      "meanings": [
+        "A와 B를 구별하다"
+      ]
+    },
+    {
+      "word": "distinguishing / distinguished",
+      "meanings": [
+        "adj. 독특한",
+        "특유의",
+        "유명한",
+        "저명한"
+      ]
+    },
+    {
+      "word": "reflect",
+      "meanings": [
+        "v. 반사하다",
+        "반향을 일으키다",
+        "나타내다",
+        "반영하다"
+      ]
+    },
+    {
+      "word": "A reflect B",
+      "meanings": [
+        "A ← B (B가 A에 투영됨)"
+      ]
+    },
+    {
+      "word": "reflect on A",
+      "meanings": [
+        "A를 깊이",
+        "곰곰이 생각하다",
+        "심사숙고하다"
+      ]
+    },
+    {
+      "word": "reflection",
+      "meanings": [
+        "n. 반사",
+        "반영",
+        "심사숙고"
+      ]
+    },
+    {
+      "word": "require",
+      "meanings": [
+        "v. 요구하다",
+        "필요로 하다"
+      ]
+    },
+    {
+      "word": "A require B",
+      "meanings": [
+        "A → B (A를 위해 B가 필요함)"
+      ]
+    },
+    {
+      "word": "depend",
+      "meanings": [
+        "v. 의지하다"
+      ]
+    },
+    {
+      "word": "A depend on B",
+      "meanings": [
+        "A ← B (B가 있어야 A가 가능함)"
+      ]
+    },
+    {
+      "word": "rely on / count on / lean on",
+      "meanings": [
+        "의존하다 시리즈 동의어"
+      ]
+    },
+    {
+      "word": "according to",
+      "meanings": [
+        "~에 따르면"
+      ]
+    },
+    {
+      "word": "A according to B",
+      "meanings": [
+        "[인과관계] B에 따라서 A하다 (B → A)"
+      ]
+    },
+    {
+      "word": "follow",
+      "meanings": [
+        "v. 따라가다"
+      ]
+    },
+    {
+      "word": "A follow B",
+      "meanings": [
+        "A가 B를 따른다 (B → A)"
+      ]
+    },
+    {
+      "word": "A is followed by B",
+      "meanings": [
+        "A가 일어난 뒤이어 B가 발생 (순서: A → B)"
+      ]
+    },
+    {
+      "word": "outweigh",
+      "meanings": [
+        "v. ~보다 무게가 나가다",
+        "중요하다",
+        "뛰어나다"
+      ]
+    },
+    {
+      "word": "A outweigh B",
+      "meanings": [
+        "A > B"
+      ]
+    },
+    {
+      "word": "outstand / outnumber / outperform",
+      "meanings": [
+        "A > B 형태의 동사들"
+      ]
+    },
+    {
+      "word": "outgrow",
+      "meanings": [
+        "v. ~보다 더 커지다[많아지다]"
+      ]
+    },
+    {
+      "word": "outgrowth",
+      "meanings": [
+        "n. 결과물"
+      ]
+    },
+    {
+      "word": "subordinate",
+      "meanings": [
+        "adj. 종속된",
+        "하급의",
+        "n. 하급자",
+        "v. 경시하다"
+      ]
+    },
+    {
+      "word": "A is subordinate to B",
+      "meanings": [
+        "A < B 또는 A → B (종속관계)"
+      ]
+    },
+    {
+      "word": "independent",
+      "meanings": [
+        "adj. 독립적인[독자적인]",
+        "독립된",
+        "별개의"
+      ]
+    },
+    {
+      "word": "A is independent from B",
+      "meanings": [
+        "A와 B는 서로 분리된 관계"
+      ]
+    },
+    {
+      "word": "owe",
+      "meanings": [
+        "v. 빚지고 있다"
+      ]
+    },
+    {
+      "word": "owe A to B",
+      "meanings": [
+        "A는 B 덕분이다 (B → A 인과관계)"
+      ]
+    }
+  ],
+  "06_1 단원": [
+    {
+      "word": "school",
+      "meanings": [
+        "n. 학교"
+      ]
+    },
+    {
+      "word": "school (Point)",
+      "meanings": [
+        "n. 학파",
+        "무리"
+      ]
+    },
+    {
+      "word": "new",
+      "meanings": [
+        "adj. 새로운"
+      ]
+    },
+    {
+      "word": "new to A",
+      "meanings": [
+        "A에 미숙한",
+        "처음 접하는"
+      ]
+    },
+    {
+      "word": "cost",
+      "meanings": [
+        "n. 비용",
+        "v. (비용이) 들다"
+      ]
+    },
+    {
+      "word": "cost (Point)",
+      "meanings": [
+        "n. 손해",
+        "대가",
+        "희생 (-)"
+      ]
+    },
+    {
+      "word": "at the cost/expense of A",
+      "meanings": [
+        "A의 대가로",
+        "희생하여",
+        "잃어 가며"
+      ]
+    },
+    {
+      "word": "level",
+      "meanings": [
+        "n. 특정한 시간적·상황에 존재하는 양의 정도",
+        "수준"
+      ]
+    },
+    {
+      "word": "level (다른 뜻)",
+      "meanings": [
+        "adj. 평평한",
+        "수평의",
+        "v. 평평하게 하다"
+      ]
+    },
+    {
+      "word": "cultural",
+      "meanings": [
+        "adj. 문화의",
+        "문화적인"
+      ]
+    },
+    {
+      "word": "cultural vs universal",
+      "meanings": [
+        "문화적(특정적",
+        "다양한) vs 보편적(공통적",
+        "동일한)"
+      ]
+    },
+    {
+      "word": "discount",
+      "meanings": [
+        "n. 할인",
+        "v. 할인하다"
+      ]
+    },
+    {
+      "word": "discount (추상적)",
+      "meanings": [
+        "무가치한 것으로 치부하다",
+        "무시하다"
+      ]
+    },
+    {
+      "word": "economy",
+      "meanings": [
+        "n. 경제",
+        "경기"
+      ]
+    },
+    {
+      "word": "economy (다른 뜻)",
+      "meanings": [
+        "국가 (경제 주체로서)",
+        "절약",
+        "아끼기"
+      ]
+    },
+    {
+      "word": "star",
+      "meanings": [
+        "n. 별"
+      ]
+    },
+    {
+      "word": "star (다른 뜻)",
+      "meanings": [
+        "v. 나타나다",
+        "출연하다",
+        "주연을 맡다"
+      ]
+    },
+    {
+      "word": "put",
+      "meanings": [
+        "v. 놓다",
+        "두다",
+        "넣다",
+        "얹다"
+      ]
+    },
+    {
+      "word": "put (다른 뜻)",
+      "meanings": [
+        "v. 말하다",
+        "쓰다",
+        "표현하다"
+      ]
+    },
+    {
+      "word": "over",
+      "meanings": [
+        "prep. 위에"
+      ]
+    },
+    {
+      "word": "A over B",
+      "meanings": [
+        "A > B (대소 관계 파악)"
+      ]
+    },
+    {
+      "word": "file",
+      "meanings": [
+        "n. 파일",
+        "서류철",
+        "v. 파일에 철하다"
+      ]
+    },
+    {
+      "word": "file (다른 뜻)",
+      "meanings": [
+        "v. 보관하다",
+        "모으다"
+      ]
+    },
+    {
+      "word": "invite",
+      "meanings": [
+        "v. 초대하다"
+      ]
+    },
+    {
+      "word": "invite (다른 뜻)",
+      "meanings": [
+        "v. 매혹하다",
+        "유혹하다"
+      ]
+    },
+    {
+      "word": "inviting",
+      "meanings": [
+        "adj. 매력적인",
+        "유혹적인"
+      ]
+    },
+    {
+      "word": "general",
+      "meanings": [
+        "adj. 일반[보편",
+        "전반]적인",
+        "n. 대장"
+      ]
+    },
+    {
+      "word": "general 본질",
+      "meanings": [
+        "전체` 개념"
+      ]
+    },
+    {
+      "word": "common",
+      "meanings": [
+        "adj. 흔한",
+        "공동의",
+        "공통의"
+      ]
+    },
+    {
+      "word": "commons",
+      "meanings": [
+        "n. 공유지",
+        "공유자원 (빈출 주제)"
+      ]
+    },
+    {
+      "word": "common sense",
+      "meanings": [
+        "n. 상식"
+      ]
+    },
+    {
+      "word": "social",
+      "meanings": [
+        "adj. 사회의",
+        "사회적인"
+      ]
+    },
+    {
+      "word": "social (상징)",
+      "meanings": [
+        "모이기를 좋아하는",
+        "사교적인"
+      ]
+    }
+  ],
+  "06_2 단원": [
+    {
+      "word": "socialize",
+      "meanings": [
+        "v. 어울리다",
+        "사회화하다"
+      ]
+    },
+    {
+      "word": "part",
+      "meanings": [
+        "n. 부분"
+      ]
+    },
+    {
+      "word": "partial",
+      "meanings": [
+        "adj. 부분적인",
+        "편파적인",
+        "불공평한 (-)"
+      ]
+    },
+    {
+      "word": "partiality",
+      "meanings": [
+        "n. 편파",
+        "불평등"
+      ]
+    },
+    {
+      "word": "impartial / impartiality",
+      "meanings": [
+        "adj. 공정한",
+        "n. 공평성"
+      ]
+    },
+    {
+      "word": "still",
+      "meanings": [
+        "adv. 아직 계속해서",
+        "그런데도",
+        "그럼에도 불구하고"
+      ]
+    },
+    {
+      "word": "still (다른 뜻)",
+      "meanings": [
+        "adj. 가만히 있는",
+        "고요한",
+        "정지한"
+      ]
+    },
+    {
+      "word": "manner",
+      "meanings": [
+        "n. 방식"
+      ]
+    },
+    {
+      "word": "manners",
+      "meanings": [
+        "n. 매너",
+        "예의"
+      ]
+    },
+    {
+      "word": "things",
+      "meanings": [
+        "n. 것들"
+      ]
+    },
+    {
+      "word": "things (확장)",
+      "meanings": [
+        "상황",
+        "형편 (매우 자주 쓰임)"
+      ]
+    },
+    {
+      "word": "shoe",
+      "meanings": [
+        "n. 신발"
+      ]
+    },
+    {
+      "word": "shoe (다른 뜻)",
+      "meanings": [
+        "n. 입장",
+        "상황"
+      ]
+    },
+    {
+      "word": "in A`s shoes",
+      "meanings": [
+        "A의 상황이나 입장이 되어"
+      ]
+    },
+    {
+      "word": "tackle",
+      "meanings": [
+        "n. 연장",
+        "태클",
+        "v. 태클하다"
+      ]
+    },
+    {
+      "word": "tackle (본질)",
+      "meanings": [
+        "다루다",
+        "힘든 문제 상황과 씨름하다",
+        "솔직하게 말하다"
+      ]
+    },
+    {
+      "word": "coin",
+      "meanings": [
+        "n. 동전",
+        "주화",
+        "v. 주조하다"
+      ]
+    },
+    {
+      "word": "coin (다른 뜻)",
+      "meanings": [
+        "v. 새로운 낱말·어구를 만들다"
+      ]
+    },
+    {
+      "word": "pay",
+      "meanings": [
+        "v. 지불하다",
+        "n. 급료",
+        "보수"
+      ]
+    },
+    {
+      "word": "pay (다른 뜻)",
+      "meanings": [
+        "v. 이득[보상]을 주다 (+)",
+        "대가를 치르다 (-)"
+      ]
+    },
+    {
+      "word": "mirror",
+      "meanings": [
+        "n. 거울"
+      ]
+    },
+    {
+      "word": "mirror (다른 뜻)",
+      "meanings": [
+        "v. 보여주다",
+        "흡사하다",
+        "반영하다"
+      ]
+    },
+    {
+      "word": "second",
+      "meanings": [
+        "adj. 2번째의",
+        "adv. 두 번째로"
+      ]
+    },
+    {
+      "word": "second (다른 뜻)",
+      "meanings": [
+        "2류의",
+        "열등한 (inferior)"
+      ]
+    },
+    {
+      "word": "secondary",
+      "meanings": [
+        "adj. 부차적인",
+        "이차적인"
+      ]
+    },
+    {
+      "word": "increasingly",
+      "meanings": [
+        "adv. 점점",
+        "갈수록"
+      ]
+    },
+    {
+      "word": "increasingly (Point)",
+      "meanings": [
+        "(단순히 `증가하게`로 직역 금지)"
+      ]
+    },
+    {
+      "word": "party",
+      "meanings": [
+        "n. 파티",
+        "잔치"
+      ]
+    },
+    {
+      "word": "party (다른 뜻)",
+      "meanings": [
+        "정당",
+        "단체",
+        "당사자"
+      ]
+    },
+    {
+      "word": "beyond",
+      "meanings": [
+        "prep. ~저편에[너머에]"
+      ]
+    },
+    {
+      "word": "beyond A",
+      "meanings": [
+        "A 수준을 넘어섰다 (= A로는 안된다)"
+      ]
+    },
+    {
+      "word": "very",
+      "meanings": [
+        "adv. 매우"
+      ]
+    },
+    {
+      "word": "very (형용사)",
+      "meanings": [
+        "바로 그"
+      ]
+    }
+  ],
+  "06_3 단원": [
+    {
+      "word": "pale",
+      "meanings": [
+        "adj. 창백한",
+        "핼쑥한",
+        "옅은",
+        "흐릿한"
+      ]
+    },
+    {
+      "word": "pale (다른 뜻)",
+      "meanings": [
+        "보잘것없는",
+        "어설픈"
+      ]
+    },
+    {
+      "word": "press",
+      "meanings": [
+        "v. 누르다",
+        "압박하다"
+      ]
+    },
+    {
+      "word": "press (다른 뜻)",
+      "meanings": [
+        "n. 신문·잡지",
+        "언론",
+        "보도"
+      ]
+    },
+    {
+      "word": "life",
+      "meanings": [
+        "n. 살아 있음",
+        "생명"
+      ]
+    },
+    {
+      "word": "life (확장)",
+      "meanings": [
+        "생물",
+        "생명체 (동식물 포함)"
+      ]
+    },
+    {
+      "word": "cultivate",
+      "meanings": [
+        "v. 경작하다",
+        "재배하다"
+      ]
+    },
+    {
+      "word": "cultivate (확장)",
+      "meanings": [
+        "만들다",
+        "기르다",
+        "발전시키다",
+        "관계를 구축하다"
+      ]
+    },
+    {
+      "word": "meet",
+      "meanings": [
+        "v. 만나다"
+      ]
+    },
+    {
+      "word": "meet (다른 뜻)",
+      "meanings": [
+        "v. 필요·요구 등을 충족시키다",
+        "기한 등을 지키다"
+      ]
+    },
+    {
+      "word": "challenge",
+      "meanings": [
+        "n. 도전",
+        "v. 도전하다"
+      ]
+    },
+    {
+      "word": "challenge (본질)",
+      "meanings": [
+        "어려운",
+        "힘든 일",
+        "의문을",
+        "이의를 제기하다",
+        "난제"
+      ]
+    },
+    {
+      "word": "factor",
+      "meanings": [
+        "n. 요소",
+        "요인"
+      ]
+    },
+    {
+      "word": "factor (본질)",
+      "meanings": [
+        "원인"
+      ]
+    },
+    {
+      "word": "while",
+      "meanings": [
+        "~동안에",
+        "~반면에"
+      ]
+    },
+    {
+      "word": "while (본질)",
+      "meanings": [
+        "두 가지 상황의 대비 (~하는데)"
+      ]
+    },
+    {
+      "word": "limit",
+      "meanings": [
+        "n. 한계",
+        "제한",
+        "경계",
+        "v. 제한하다"
+      ]
+    },
+    {
+      "word": "limit A / be limited to A",
+      "meanings": [
+        "제한",
+        "한정 표현들"
+      ]
+    },
+    {
+      "word": "free",
+      "meanings": [
+        "adj. 자유로운"
+      ]
+    },
+    {
+      "word": "free to V",
+      "meanings": [
+        "자유롭게 ~하다",
+        "마음놓고 ~하다"
+      ]
+    },
+    {
+      "word": "free from A / A-free",
+      "meanings": [
+        "A로부터 벗어난",
+        "A 없는"
+      ]
+    },
+    {
+      "word": "plastic",
+      "meanings": [
+        "n. 플라스틱"
+      ]
+    },
+    {
+      "word": "plastic (다른 뜻)",
+      "meanings": [
+        "형태를 바꾸기 쉬운",
+        "가소성이 있는",
+        "가짜의",
+        "진실되지 못한"
+      ]
+    },
+    {
+      "word": "plasticity",
+      "meanings": [
+        "n. 가소성",
+        "연함",
+        "말랑함"
+      ]
+    },
+    {
+      "word": "arguably",
+      "meanings": [
+        "adv. 주장하건대",
+        "거의 틀림없이"
+      ]
+    },
+    {
+      "word": "arguably (Point)",
+      "meanings": [
+        "필자의 주장을 강조"
+      ]
+    },
+    {
+      "word": "gauge",
+      "meanings": [
+        "n. 게이지",
+        "v. 판단하다",
+        "측정하다"
+      ]
+    },
+    {
+      "word": "gauge (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "end",
+      "meanings": [
+        "n. 끝",
+        "종료",
+        "v. 끝나다"
+      ]
+    },
+    {
+      "word": "end (다른 뜻)",
+      "meanings": [
+        "n. 목적"
+      ]
+    },
+    {
+      "word": "to this end",
+      "meanings": [
+        "이 목표를 위하여"
+      ]
+    },
+    {
+      "word": "survive",
+      "meanings": [
+        "v. 살아남다"
+      ]
+    },
+    {
+      "word": "A survive B",
+      "meanings": [
+        "A가 B보다 오래 살다"
+      ]
+    }
+  ],
+  "06_4 단원": [
+    {
+      "word": "clear",
+      "meanings": [
+        "adj. 알아듣기 쉬운",
+        "분명한",
+        "투명한"
+      ]
+    },
+    {
+      "word": "clear (다른 뜻)",
+      "meanings": [
+        "v. 완전히 제거하다"
+      ]
+    },
+    {
+      "word": "literature",
+      "meanings": [
+        "n. 문학"
+      ]
+    },
+    {
+      "word": "literature (다른 뜻)",
+      "meanings": [
+        "n. 문헌"
+      ]
+    },
+    {
+      "word": "make up",
+      "meanings": [
+        "화장"
+      ]
+    },
+    {
+      "word": "make up (동사구)",
+      "meanings": [
+        "거짓으로 꾸며내다",
+        "보충하다",
+        "채워 넣다",
+        "구성하다"
+      ]
+    },
+    {
+      "word": "long",
+      "meanings": [
+        "adj. 긴",
+        "오래"
+      ]
+    },
+    {
+      "word": "long for",
+      "meanings": [
+        "기대하다",
+        "고대하다"
+      ]
+    },
+    {
+      "word": "competition",
+      "meanings": [
+        "n. 경쟁",
+        "대회"
+      ]
+    },
+    {
+      "word": "competition (다른 뜻)",
+      "meanings": [
+        "경쟁자"
+      ]
+    },
+    {
+      "word": "trunk",
+      "meanings": [
+        "n. 트렁크"
+      ]
+    },
+    {
+      "word": "trunk (다른 뜻)",
+      "meanings": [
+        "n. 몸통",
+        "줄기"
+      ]
+    },
+    {
+      "word": "mad",
+      "meanings": [
+        "adj. 화난",
+        "미친"
+      ]
+    },
+    {
+      "word": "mad (확장)",
+      "meanings": [
+        "미친 듯이",
+        "정신 없이 (like mad",
+        "crazy)"
+      ]
+    },
+    {
+      "word": "modest",
+      "meanings": [
+        "adj. 겸손한"
+      ]
+    },
+    {
+      "word": "modest (본질)",
+      "meanings": [
+        "크지 않은",
+        "그다지 대단하지 않은",
+        "보통의"
+      ]
+    },
+    {
+      "word": "local",
+      "meanings": [
+        "adj. 지역의",
+        "현지의"
+      ]
+    },
+    {
+      "word": "local (본질)",
+      "meanings": [
+        "특정한 부분에 국한된 (localize: 국한시키다)"
+      ]
+    },
+    {
+      "word": "room",
+      "meanings": [
+        "n. 방"
+      ]
+    },
+    {
+      "word": "room (다른 뜻)",
+      "meanings": [
+        "여지",
+        "가능성"
+      ]
+    },
+    {
+      "word": "way",
+      "meanings": [
+        "n. 길",
+        "방법"
+      ]
+    },
+    {
+      "word": "way (수식어)",
+      "meanings": [
+        "아주 멀리",
+        "큰 차이로",
+        "훨씬 (very 느낌)"
+      ]
+    },
+    {
+      "word": "earthly / worldly",
+      "meanings": [
+        "adj. 세속적인"
+      ]
+    },
+    {
+      "word": "earthly (Point)",
+      "meanings": [
+        "인간의 고차원적인 사고가 아닌 세속적",
+        "실용적 이익 (↔ metaphysical)"
+      ]
+    },
+    {
+      "word": "fashion",
+      "meanings": [
+        "n. 패션",
+        "유행",
+        "방식"
+      ]
+    },
+    {
+      "word": "fashion (동사)",
+      "meanings": [
+        "v. 형성하다",
+        "만들다"
+      ]
+    },
+    {
+      "word": "old-fashioned",
+      "meanings": [
+        "adj. 구식의"
+      ]
+    },
+    {
+      "word": "ground",
+      "meanings": [
+        "n. 땅",
+        "지면"
+      ]
+    },
+    {
+      "word": "ground (다른 뜻)",
+      "meanings": [
+        "v. ~에 근거를[기반을] 두다"
+      ]
+    },
+    {
+      "word": "define",
+      "meanings": [
+        "v. 정의하다",
+        "규정하다"
+      ]
+    },
+    {
+      "word": "defining",
+      "meanings": [
+        "(의역) 확실한",
+        "결정적인",
+        "중요한"
+      ]
+    },
+    {
+      "word": "tell",
+      "meanings": [
+        "v. 알리다",
+        "말하다"
+      ]
+    },
+    {
+      "word": "tell (다른 뜻)",
+      "meanings": [
+        "알다",
+        "판단하다",
+        "구별[식별]하다"
+      ]
+    }
+  ],
+  "07_1 단원": [
+    {
+      "word": "seal",
+      "meanings": [
+        "v. 봉인하다",
+        "n. 봉인",
+        "인장"
+      ]
+    },
+    {
+      "word": "seal (다른 뜻)",
+      "meanings": [
+        "n. 바다표범",
+        "물개",
+        "v. 확정하다",
+        "결정하다"
+      ]
+    },
+    {
+      "word": "anecdote",
+      "meanings": [
+        "n. 일화",
+        "이야기"
+      ]
+    },
+    {
+      "word": "anecdote (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "shiver",
+      "meanings": [
+        "v. 추위·두려움 등으로 몸을 떨다"
+      ]
+    },
+    {
+      "word": "shiver (Point)",
+      "meanings": [
+        "n. 떨림"
+      ]
+    },
+    {
+      "word": "better off",
+      "meanings": [
+        "형편이 나은"
+      ]
+    },
+    {
+      "word": "better off (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "payoff",
+      "meanings": [
+        "n. 보상",
+        "이점",
+        "이득"
+      ]
+    },
+    {
+      "word": "pay off",
+      "meanings": [
+        "v. 보상을 주다"
+      ]
+    },
+    {
+      "word": "layperson",
+      "meanings": [
+        "n. 비전문가"
+      ]
+    },
+    {
+      "word": "layperson (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "comfort zone",
+      "meanings": [
+        "안락 구역"
+      ]
+    },
+    {
+      "word": "comfort zone (Point)",
+      "meanings": [
+        "굳이 노력하지 않아도 편한 상태 (autopilot)"
+      ]
+    },
+    {
+      "word": "the last thing",
+      "meanings": [
+        "마지막"
+      ]
+    },
+    {
+      "word": "the last thing (의역)",
+      "meanings": [
+        "가장 원하지 않는 것"
+      ]
+    },
+    {
+      "word": "analogy",
+      "meanings": [
+        "n. 비유",
+        "유추",
+        "유사점"
+      ]
+    },
+    {
+      "word": "analog",
+      "meanings": [
+        "adj. 유사의",
+        "아날로그의"
+      ]
+    },
+    {
+      "word": "natural selection",
+      "meanings": [
+        "자연 선택"
+      ]
+    },
+    {
+      "word": "natural selection (Point)",
+      "meanings": [
+        "생존할 준비가 가장 잘 된 개체가 선택됨"
+      ]
+    },
+    {
+      "word": "hardwire",
+      "meanings": [
+        "v. 고정화시키다",
+        "굳어버리게 하다"
+      ]
+    },
+    {
+      "word": "hardwire (상징)",
+      "meanings": [
+        "타고남",
+        "내재됨",
+        "유전적"
+      ]
+    },
+    {
+      "word": "ratio",
+      "meanings": [
+        "n. 비",
+        "비율"
+      ]
+    },
+    {
+      "word": "ratio of A to B",
+      "meanings": [
+        "B에 대한 A의 비율 (A",
+        "B)"
+      ]
+    },
+    {
+      "word": "diabetes",
+      "meanings": [
+        "n. 당뇨병"
+      ]
+    },
+    {
+      "word": "diabetes (Point)",
+      "meanings": [
+        "(평가원 빈출 단어)"
+      ]
+    },
+    {
+      "word": "patent",
+      "meanings": [
+        "n. 특허",
+        "adj. 특허의"
+      ]
+    },
+    {
+      "word": "patent (Point)",
+      "meanings": [
+        "v. 특허를 획득하다"
+      ]
+    },
+    {
+      "word": "manifest",
+      "meanings": [
+        "v. 나타내다",
+        "증명하다",
+        "adj. 명백한"
+      ]
+    },
+    {
+      "word": "manifestation",
+      "meanings": [
+        "n. 징후",
+        "증상 (A is a manifestation of B)"
+      ]
+    },
+    {
+      "word": "incompatible",
+      "meanings": [
+        "adj. 양립할 수 없는"
+      ]
+    },
+    {
+      "word": "incompatible (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "indispensable",
+      "meanings": [
+        "adj. 없어서는 안 될",
+        "필수적인"
+      ]
+    }
+  ],
+  "07_2 단원": [
+    {
+      "word": "indispensable (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "outdated",
+      "meanings": [
+        "adj. 구식인",
+        "시대에 뒤떨어진"
+      ]
+    },
+    {
+      "word": "outdated (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "perplex",
+      "meanings": [
+        "v. 당혹하게 하다"
+      ]
+    },
+    {
+      "word": "perplexed",
+      "meanings": [
+        "adj. 당황한 (= confuse)"
+      ]
+    },
+    {
+      "word": "persevere",
+      "meanings": [
+        "v. 참다",
+        "인내하다"
+      ]
+    },
+    {
+      "word": "perseverance",
+      "meanings": [
+        "n. 인내심"
+      ]
+    },
+    {
+      "word": "double-edged sword",
+      "meanings": [
+        "양날의 검"
+      ]
+    },
+    {
+      "word": "double-edged sword",
+      "meanings": [
+        "장점(+)과 단점(-)의 공존"
+      ]
+    },
+    {
+      "word": "authenticate",
+      "meanings": [
+        "v. 진짜임을 증명하다"
+      ]
+    },
+    {
+      "word": "authentic / authenticity",
+      "meanings": [
+        "adj. 진짜의",
+        "진품의",
+        "n. 진짜임"
+      ]
+    },
+    {
+      "word": "tyrant",
+      "meanings": [
+        "n. 폭군",
+        "독재자"
+      ]
+    },
+    {
+      "word": "tyranny",
+      "meanings": [
+        "n. 압제",
+        "폭압",
+        "포학 행위",
+        "전제 정치 (-)"
+      ]
+    },
+    {
+      "word": "milestone",
+      "meanings": [
+        "n. 이정표"
+      ]
+    },
+    {
+      "word": "milestone (의역)",
+      "meanings": [
+        "중요한 사건",
+        "순간"
+      ]
+    },
+    {
+      "word": "cornerstone",
+      "meanings": [
+        "n. 주춧돌",
+        "초석"
+      ]
+    },
+    {
+      "word": "cornerstone (Point)",
+      "meanings": [
+        "(추상적) 인과 관계를 주는 사실"
+      ]
+    },
+    {
+      "word": "peasant",
+      "meanings": [
+        "n. 소작농",
+        "소농"
+      ]
+    },
+    {
+      "word": "peasant (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "quest",
+      "meanings": [
+        "n. 탐구",
+        "탐색"
+      ]
+    },
+    {
+      "word": "quest (Point)",
+      "meanings": [
+        "v. 탐구하다"
+      ]
+    },
+    {
+      "word": "fluctuate",
+      "meanings": [
+        "v. 오르내리다",
+        "변동하다"
+      ]
+    },
+    {
+      "word": "fluctuation",
+      "meanings": [
+        "n. 변동",
+        "동요"
+      ]
+    },
+    {
+      "word": "indigenous",
+      "meanings": [
+        "adj. 토착의",
+        "원산의",
+        "현지의"
+      ]
+    },
+    {
+      "word": "indigenous (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    },
+    {
+      "word": "symmetry",
+      "meanings": [
+        "n. 대칭",
+        "균형"
+      ]
+    },
+    {
+      "word": "asymmetry",
+      "meanings": [
+        "n. 비대칭",
+        "불균형"
+      ]
+    },
+    {
+      "word": "coverage",
+      "meanings": [
+        "n. 보도[방송]",
+        "범위"
+      ]
+    },
+    {
+      "word": "cover",
+      "meanings": [
+        "덮다",
+        "(사건을) 다루다",
+        "취재",
+        "방송하다"
+      ]
+    },
+    {
+      "word": "self-contained",
+      "meanings": [
+        "adj. 자족적인",
+        "자립하는"
+      ]
+    },
+    {
+      "word": "self-contained (Point)",
+      "meanings": [
+        "외부 도움 없이 독립된 (= independent)"
+      ]
+    },
+    {
+      "word": "lest",
+      "meanings": [
+        "conj. ~하지 않도록",
+        "~할까 봐"
+      ]
+    },
+    {
+      "word": "lest (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    }
+  ],
+  "07_3 단원": [
+    {
+      "word": "conventional wisdom",
+      "meanings": [
+        "n. 일반 통념",
+        "속된 지혜"
+      ]
+    }
+  ],
+  "07_4 단원": [
+    {
+      "word": "conventional wisdom",
+      "meanings": [
+        "(주로 뒤집히는 통념",
+        "예상하되 속단 금물)"
+      ]
+    }
+  ],
+  "07_5 단원": [
+    {
+      "word": "pitfall",
+      "meanings": [
+        "n. 눈에 띄는 위험[곤란]",
+        "함정"
+      ]
+    }
+  ],
+  "07_6 단원": [
+    {
+      "word": "pitfall (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    }
+  ],
+  "07_7 단원": [
+    {
+      "word": "aggravate",
+      "meanings": [
+        "v. 악화시키다"
+      ]
+    }
+  ],
+  "07_8 단원": [
+    {
+      "word": "aggravate (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    }
+  ],
+  "07_9 단원": [
+    {
+      "word": "unaided eye",
+      "meanings": [
+        "육안"
+      ]
+    }
+  ],
+  "07_10 단원": [
+    {
+      "word": "unaided eye (Point)",
+      "meanings": [
+        "도구의 도움을 받지 않은 눈"
+      ]
+    }
+  ],
+  "07_11 단원": [
+    {
+      "word": "naked eye",
+      "meanings": [
+        "육안"
+      ]
+    }
+  ],
+  "07_12 단원": [
+    {
+      "word": "naked eye (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    }
+  ],
+  "07_13 단원": [
+    {
+      "word": "fortify",
+      "meanings": [
+        "v. 요새화하다"
+      ]
+    }
+  ],
+  "07_14 단원": [
+    {
+      "word": "fortify (Point)",
+      "meanings": [
+        "(외부 침입을 막게) 단단하게 만들다",
+        "강화하다"
+      ]
+    }
+  ],
+  "07_15 단원": [
+    {
+      "word": "lag",
+      "meanings": [
+        "v. 뒤처지다",
+        "n. 지연",
+        "시간적 격차"
+      ]
+    }
+  ],
+  "07_16 단원": [
+    {
+      "word": "time lag / jet lag",
+      "meanings": [
+        "시간 지연",
+        "시차증"
+      ]
+    }
+  ],
+  "07_17 단원": [
+    {
+      "word": "cutting-edge",
+      "meanings": [
+        "n. 최첨단",
+        "adj. 최첨단의"
+      ]
+    }
+  ],
+  "07_18 단원": [
+    {
+      "word": "cutting-edge (Point)",
+      "meanings": [
+        "(단순 암기)"
+      ]
+    }
+  ],
+  "07_19 단원": [
+    {
+      "word": "natural enemy",
+      "meanings": [
+        "n. 천적"
+      ]
+    }
+  ],
+  "07_20 단원": [
+    {
+      "word": "natural enemy (Point)",
+      "meanings": [
+        "(`자연적인 적`으로 직역 금지)"
+      ]
+    }
+  ],
+  "07_21 단원": [
+    {
+      "word": "zero-sum game",
+      "meanings": [
+        "제로섬 게임 (합이 0)"
+      ]
+    }
+  ],
+  "07_22 단원": [
+    {
+      "word": "negative / positive-sum game",
+      "meanings": [
+        "마이너스섬(-)",
+        "포지티브섬(+) 게임"
+      ]
+    }
+  ],
+  "07_23 단원": [
+    {
+      "word": "polarize",
+      "meanings": [
+        "v. 양극화되다"
+      ]
+    }
+  ],
+  "07_24 단원": [
+    {
+      "word": "polarity / polarization",
+      "meanings": [
+        "n. 양극성",
+        "양극화"
+      ]
+    }
+  ],
+  "07_25 단원": [
+    {
+      "word": "built-in",
+      "meanings": [
+        "adj. 붙박이의"
+      ]
+    }
+  ],
+  "07_26 단원": [
+    {
+      "word": "built-in (추상적)",
+      "meanings": [
+        "타고난",
+        "내재된"
+      ]
+    }
+  ],
+  "07_27 단원": [
+    {
+      "word": "photosynthesize",
+      "meanings": [
+        "v. 광합성하다"
+      ]
+    }
+  ],
+  "07_28 단원": [
+    {
+      "word": "photosynthesis",
+      "meanings": [
+        "n. 광합성"
+      ]
+    }
+  ],
+  "07_29 단원": [
+    {
+      "word": "acquaint",
+      "meanings": [
+        "v. 알다",
+        "익히다",
+        "가까워지다"
+      ]
+    }
+  ],
+  "07_30 단원": [
+    {
+      "word": "acquaintance",
+      "meanings": [
+        "n. 지인",
+        "아는 사람"
+      ]
+    }
+  ],
+  "07_31 단원": [
+    {
+      "word": "proactive",
+      "meanings": [
+        "adj. 상황을 앞서서 주도하는"
+      ]
+    }
+  ],
+  "07_32 단원": [
+    {
+      "word": "proactive (Point)",
+      "meanings": [
+        "사전 대책을 강구하는"
+      ]
+    }
+  ],
+  "07_33 단원": [
+    {
+      "word": "autonomy",
+      "meanings": [
+        "n. 자치권",
+        "자율성"
+      ]
+    }
+  ],
+  "07_34 단원": [
+    {
+      "word": "autonomous",
+      "meanings": [
+        "adj. 자율의",
+        "자치권이 있는"
+      ]
+    }
+  ],
+  "07_35 단원": [
+    {
+      "word": "perspective",
+      "meanings": [
+        "n. 관점",
+        "시각"
+      ]
+    }
+  ],
+  "07_36 단원": [
+    {
+      "word": "perspective (다른 뜻)",
+      "meanings": [
+        "원근법"
+      ]
+    }
+  ],
+  "07_37 단원": [
+    {
+      "word": "metaphysical",
+      "meanings": [
+        "adj. 형이상학적인"
+      ]
+    }
+  ],
+  "07_38 단원": [
+    {
+      "word": "metaphysical (Point)",
+      "meanings": [
+        "세속적(earthly) 반대",
+        "추상적",
+        "본질적 근거 연구"
+      ]
+    }
+  ],
+  "07_39 단원": [
+    {
+      "word": "altruistically",
+      "meanings": [
+        "adv. 이타적으로"
+      ]
+    }
+  ],
+  "07_40 단원": [
+    {
+      "word": "altruistic",
+      "meanings": [
+        "adj. 이타주의적인",
+        "이타적인"
+      ]
+    }
+  ],
+  "07_41 단원": [
+    {
+      "word": "prosocial",
+      "meanings": [
+        "adj. 친사회적인",
+        "사회에 이로운"
+      ]
+    }
+  ],
+  "07_42 단원": [
+    {
+      "word": "prosocial (Point)",
+      "meanings": [
+        "(pro- = 찬성",
+        "지지) 사회에 이로운"
+      ]
+    }
+  ],
+  "07_43 단원": [
+    {
+      "word": "Neanderthal",
+      "meanings": [
+        "adj. 네안데르탈인의"
+      ]
+    }
+  ],
+  "07_44 단원": [
+    {
+      "word": "Neanderthal (Point)",
+      "meanings": [
+        "구석기 시대 사람 같은"
+      ]
+    }
+  ],
+  "07_45 단원": [
+    {
+      "word": "hibernate",
+      "meanings": [
+        "v. 동면하다"
+      ]
+    }
+  ],
+  "07_46 단원": [
+    {
+      "word": "hibernation",
+      "meanings": [
+        "n. 동면"
+      ]
+    }
+  ]
+};
+
+let currentUnitData = [];
+
+// =========================================================================
+// [관리자 및 CSV 업로드 로직]
+// =========================================================================
+function checkAdmin() {
+const pw = document.getElementById('admin-pw').value;
+if (pw === "0814") {
+document.getElementById('upload-section').classList.remove('hidden');
+alert("인증 성공! 단어장 CSV 파일을 업로드하면 학생 배포용 HTML 파일이 자동으로 생성되어 다운로드됩니다.");
+} else {
+alert("비밀번호가 일치하지 않습니다.");
+}
+}
+
+function parseCSVRow(row) {
+let cols = [];
+let inQuotes = false;
+let currentStr = "";
+for (let i = 0; i < row.length; i++) {
+let char = row[i];
+if (char === '"') {
+inQuotes = !inQuotes;
+} else if (char === ',' && !inQuotes) {
+cols.push(currentStr.trim());
+currentStr = "";
+} else {
+currentStr += char;
+}
+}
+cols.push(currentStr.trim());
+return cols;
+}
+
+function handleCSVUpload(event) {
+const file = event.target.files[0];
+if (!file) return;
+
+const fileName = file.name.replace(/\.[^/.]+$/, "");
+
+const reader = new FileReader();
+reader.onload = function(e) {
+let result = e.target.result;
+// 근본적인 UTF-8 BOM(Byte Order Mark) 제거
+if (result.charCodeAt(0) === 0xFEFF) {
+    result = result.substring(1);
+}
+processCSVData(result, fileName);
+};
+reader.readAsText(file, "UTF-8"); 
+}
+
+function processCSVData(csvText, fileName) {
+const rows = csvText.replace(/\r/g, '').split('\n');
+const newWordData = {};
+
+for (let i = 1; i < rows.length; i++) {
+const row = rows[i].trim();
+if (!row) continue;
+
+const columns = parseCSVRow(row);
+
+if (columns.length >= 3) {
+const unitName = columns[0].replace(/"/g, '').trim();
+const word = columns[1].replace(/"/g, '').trim();
+const meaningStr = columns[2].replace(/"/g, '');
+const meanings = meaningStr.split(/[,/]/).map(m => m.trim()).filter(m => m !== '');
+
+if (!newWordData[unitName]) {
+newWordData[unitName] = [];
+}
+newWordData[unitName].push({ word: word, meanings: meanings });
+}
+}
+
+wordDataByUnit = newWordData;
+updateUnitSelectDropdown();
+
+downloadStudentHTML(newWordData, fileName);
+}
+
+// =========================================================================
+// [독립된 학생용 HTML 생성 및 다운로드 엔진]
+// =========================================================================
+function downloadStudentHTML(newData, fileName) {
+    const newDoc = document.documentElement.cloneNode(true);
+    
+    const adminPanel = newDoc.querySelector('.admin-panel');
+    if (adminPanel) {
+        adminPanel.parentNode.removeChild(adminPanel);
+    }
+
+    // 학생 모드로 다운로드 될 때 로그인 창을 즉시 보이도록 DOM 조작
+    const loginOverlay = newDoc.querySelector('#student-login-overlay');
+    if (loginOverlay) loginOverlay.style.display = 'flex';
+    
+    const submitSection = newDoc.querySelector('#submit-section');
+    if (submitSection) submitSection.style.display = 'block';
+
+    let htmlContent = newDoc.outerHTML;
+    htmlContent = htmlContent.replace('let isStudentMode = false;', 'let isStudentMode = true;');
+
+    const regex = /let wordDataByUnit = [\s\S]*?let currentUnitData = \[\];/;
+    const newDataString = `let wordDataByUnit = ${JSON.stringify(newData, null, 2)};\n\nlet currentUnitData = [];`;
+    htmlContent = htmlContent.replace(regex, newDataString);
+
+    const finalHTML = "<!DOCTYPE html>\n" + htmlContent;
+    
+    const blob = new Blob(["\uFEFF" + finalHTML], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    
+    a.download = fileName ? `${fileName}.html` : "학생배포용_영단어학습.html"; 
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ 작업 완료!\n[${a.download}] 파일이 다운로드되었습니다.\n(해당 파일에는 관리자 메뉴가 존재하지 않으며 구글 시트 연동 로그인 시스템이 켜져 있습니다.)`);
+    
+    document.getElementById('upload-section').classList.add('hidden');
+    document.getElementById('admin-pw').value = '';
+    document.getElementById('csv-file').value = '';
+}
+
+
+function updateUnitSelectDropdown() {
+const select = document.getElementById('unit-select');
+select.innerHTML = '';
+
+Object.keys(wordDataByUnit).forEach(unit => {
+const option = document.createElement('option');
+option.value = unit;
+option.innerText = unit;
+select.appendChild(option);
+});
+
+if (Object.keys(wordDataByUnit).length > 0) {
+select.value = Object.keys(wordDataByUnit)[0];
+}
+changeUnit();
+}
+
+// =========================================================================
+// [단원 변경 및 탭 전환]
+// =========================================================================
+function changeUnit() {
+const selectedUnit = document.getElementById('unit-select').value;
+currentUnitData = wordDataByUnit[selectedUnit] || [];
+
+wrongWordsSet.clear();
+time1 = 0; time2 = 0; time3 = 0;
+step1Start = Date.now();
+
+initTable();
+initSpellTable();
+
+if (document.getElementById('spelling').classList.contains('active')) {
+initSpellingGame();
+} else {
+currentSpellWord = null;
+}
+}
+
+function switchTab(tabId) {
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+if (tabId === 'spelling' && currentSpellWord === null) initSpellingGame();
+}
+
+// =========================================================================
+// [1번 탭] 의미 테스트 테이블 로직
+// =========================================================================
+function initTable() {
+const tbody = document.getElementById('word-table-body');
+tbody.innerHTML = '';
+step1Start = Date.now();
+
+currentUnitData.forEach((item, index) => {
+const tr = document.createElement('tr');
+tr.innerHTML = `
+<td><strong>${item.word}</strong></td>
+<td><input type="text" id="b_${index}" placeholder="뜻을 쉼표(,)로 구분"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="d_${index}" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="e_${index}" disabled placeholder="D열 단어 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="g_${index}" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="h_${index}" disabled placeholder="G열 단어 3차 테스트"></td>
+`;
+tbody.appendChild(tr);
+});
+}
+
+function checkAnswer(inputVal, correctMeanings) {
+const inputs = inputVal.split(',').map(s => s.replace(/\s+/g, '')).filter(s => s !== '');
+let matchCount = 0;
+let matchedIndices = [];
+let hasWrongInput = false;
+
+inputs.forEach(val => {
+const matchedIdx = correctMeanings.findIndex((m, idx) => !matchedIndices.includes(idx) && m.replace(/\s+/g, '') === val);
+if (matchedIdx !== -1) {
+matchCount++;
+matchedIndices.push(matchedIdx);
+} else {
+hasWrongInput = true;
+}
+});
+
+if (hasWrongInput) return 'wrong';
+if (matchCount === 0) return 'wrong';
+if (matchCount < correctMeanings.length) return 'partial';
+return 'correct';
+}
+
+function getMissingMeanings(val, correctMeanings) {
+const inputs = val ? val.split(',').map(s => s.replace(/\s+/g, '')).filter(s => s !== '') : [];
+let matchedIndices = [];
+
+inputs.forEach(input => {
+const matchedIdx = correctMeanings.findIndex((m, idx) => !matchedIndices.includes(idx) && m.replace(/\s+/g, '') === input);
+if (matchedIdx !== -1) {
+matchedIndices.push(matchedIdx);
+}
+});
+
+return correctMeanings.filter((_, idx) => !matchedIndices.includes(idx));
+}
+
+function createResultHTML(val, result, correctMeanings, missingMeanings) {
+if (result === 'wrong') {
+if (val) return `<span style="text-decoration: line-through; color: #7f8c8d;">${val}</span> <span style="color: red;">${correctMeanings.join(', ')}</span>`;
+return `<span style="color: red;">${correctMeanings.join(', ')}</span>`;
+} else if (result === 'partial') {
+return `<span style="color: blue;">${val}</span> <span style="color: blue;">(${missingMeanings.join(', ')})</span>`;
+} else {
+return `<span style="color: black; font-weight: bold;">${val}</span>`;
+}
+}
+
+function gradeStep1() {
+time1 += (Date.now() - step1Start);
+
+let wrongIndex = 0;
+currentUnitData.forEach((_, i) => {
+document.getElementById(`d_${i}`).innerText = '-';
+document.getElementById(`g_${i}`).innerText = '-';
+});
+
+currentUnitData.forEach((item, index) => {
+const bInput = document.getElementById(`b_${index}`);
+const val = bInput.value.trim();
+let result = 'wrong';
+if (val) result = checkAnswer(val, item.meanings);
+
+const missingMeanings = getMissingMeanings(val, item.meanings);
+const resultHTML = createResultHTML(val, result, item.meanings, missingMeanings);
+
+bInput.style.display = 'none';
+const existingSpan = document.getElementById(`res_b_${index}`);
+if (existingSpan) existingSpan.remove();
+
+const resSpan = document.createElement('span');
+resSpan.id = `res_b_${index}`;
+resSpan.innerHTML = resultHTML;
+bInput.parentNode.appendChild(resSpan);
+
+if (result === 'wrong') {
+wrongWordsSet.add(item.word);
+const targetD = document.getElementById(`d_${wrongIndex}`);
+targetD.innerText = item.word;
+targetD.dataset.originalIndex = index;
+wrongIndex++;
+}
+});
+
+saveUnsentData();
+}
+
+function startStep2() {
+step2Start = Date.now();
+currentUnitData.forEach((_, index) => {
+const bInput = document.getElementById(`b_${index}`);
+bInput.classList.add('hidden');
+const resSpan = document.getElementById(`res_b_${index}`);
+if (resSpan) resSpan.classList.add('hidden');
+
+const dText = document.getElementById(`d_${index}`).innerText;
+const eInput = document.getElementById(`e_${index}`);
+if (dText !== '-') {
+eInput.disabled = false;
+} else {
+eInput.disabled = true;
+}
+});
+alert('뜻 2차 테스트가 시작되었습니다. B열이 가려집니다.');
+}
+
+function gradeStep2() {
+time2 += (Date.now() - step2Start);
+
+let wrongIndexStep3 = 0;
+currentUnitData.forEach((_, i) => {
+document.getElementById(`g_${i}`).innerText = '-';
+});
+
+currentUnitData.forEach((_, index) => {
+const dCell = document.getElementById(`d_${index}`);
+const eInput = document.getElementById(`e_${index}`);
+
+if (dCell.innerText !== '-' && !eInput.disabled) {
+const originalIndex = dCell.dataset.originalIndex;
+const correctMeanings = currentUnitData[originalIndex].meanings;
+
+const val = eInput.value.trim();
+let result = 'wrong';
+if (val) result = checkAnswer(val, correctMeanings);
+
+const missingMeanings = getMissingMeanings(val, correctMeanings);
+const resultHTML = createResultHTML(val, result, correctMeanings, missingMeanings);
+
+eInput.style.display = 'none';
+const existingSpan = document.getElementById(`res_e_${index}`);
+if (existingSpan) existingSpan.remove();
+
+const resSpan = document.createElement('span');
+resSpan.id = `res_e_${index}`;
+resSpan.innerHTML = resultHTML;
+eInput.parentNode.appendChild(resSpan);
+
+if (result === 'wrong') {
+wrongWordsSet.add(currentUnitData[originalIndex].word); 
+const targetG = document.getElementById(`g_${wrongIndexStep3}`);
+targetG.innerText = dCell.innerText;
+targetG.dataset.originalIndex = originalIndex;
+wrongIndexStep3++;
+}
+}
+});
+
+saveUnsentData();
+}
+
+function startStep3() {
+step3Start = Date.now();
+currentUnitData.forEach((_, index) => {
+const eInput = document.getElementById(`e_${index}`);
+eInput.classList.add('hidden');
+const resSpan = document.getElementById(`res_e_${index}`);
+if (resSpan) resSpan.classList.add('hidden');
+
+const gText = document.getElementById(`g_${index}`).innerText;
+const hInput = document.getElementById(`h_${index}`);
+if (gText !== '-') {
+hInput.disabled = false;
+} else {
+hInput.disabled = true;
+}
+});
+alert('뜻 3차 테스트가 시작되었습니다. E열이 가려집니다.');
+}
+
+function gradeStep3() {
+time3 += (Date.now() - step3Start);
+
+currentUnitData.forEach((_, index) => {
+const gCell = document.getElementById(`g_${index}`);
+const hInput = document.getElementById(`h_${index}`);
+
+if (gCell.innerText !== '-' && !hInput.disabled) {
+const originalIndex = gCell.dataset.originalIndex;
+const correctMeanings = currentUnitData[originalIndex].meanings;
+
+const val = hInput.value.trim();
+let result = 'wrong';
+if (val) result = checkAnswer(val, correctMeanings);
+
+const missingMeanings = getMissingMeanings(val, correctMeanings);
+const resultHTML = createResultHTML(val, result, correctMeanings, missingMeanings);
+
+hInput.style.display = 'none';
+const existingSpan = document.getElementById(`res_h_${index}`);
+if (existingSpan) existingSpan.remove();
+
+const resSpan = document.createElement('span');
+resSpan.id = `res_h_${index}`;
+resSpan.innerHTML = resultHTML;
+hInput.parentNode.appendChild(resSpan);
+
+if (result === 'wrong') {
+    wrongWordsSet.add(currentUnitData[originalIndex].word); 
+}
+}
+});
+
+saveUnsentData();
+}
+
+// =========================================================================
+// [2번 탭] 철자 쓰기 테스트 로직
+// =========================================================================
+function initSpellTable() {
+const tbody = document.getElementById('spell-table-body');
+tbody.innerHTML = '';
+step1Start = Date.now();
+
+currentUnitData.forEach((item, index) => {
+const tr = document.createElement('tr');
+tr.innerHTML = `
+<td><strong>${item.meanings.join(', ')}</strong></td>
+<td><input type="text" id="sb_${index}" placeholder="철자 쓰기"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sd_${index}" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="se_${index}" disabled placeholder="D열 철자 2차 테스트"></td>
+<td><input type="text" placeholder="자유 연습"></td>
+<td id="sg_${index}" style="color:#7f8c8d; font-weight:bold;">-</td>
+<td><input type="text" id="sh_${index}" disabled placeholder="G열 철자 3차 테스트"></td>
+`;
+tbody.appendChild(tr);
+});
+}
+
+function gradeSpellStep1() {
+time1 += (Date.now() - step1Start);
+
+let wrongIndex = 0;
+currentUnitData.forEach((_, i) => {
+document.getElementById(`sd_${i}`).innerText = '-';
+document.getElementById(`sg_${i}`).innerText = '-';
+});
+
+currentUnitData.forEach((item, index) => {
+const bInput = document.getElementById(`sb_${index}`);
+const val = bInput.value.trim();
+
+let result = 'wrong';
+if (val && val.toLowerCase() === item.word.toLowerCase()) {
+result = 'correct';
+}
+
+let resultHTML = "";
+if (result === 'wrong') {
+if (val) resultHTML = `<span style="text-decoration: line-through; color: #7f8c8d;">${val}</span> <span style="color: red;">${item.word}</span>`;
+else resultHTML = `<span style="color: red;">${item.word}</span>`;
+} else {
+resultHTML = `<span style="color: black; font-weight: bold;">${val}</span>`;
+}
+
+bInput.style.display = 'none';
+const existingSpan = document.getElementById(`res_sb_${index}`);
+if (existingSpan) existingSpan.remove();
+
+const resSpan = document.createElement('span');
+resSpan.id = `res_sb_${index}`;
+resSpan.innerHTML = resultHTML;
+bInput.parentNode.appendChild(resSpan);
+
+if (result === 'wrong') {
+wrongWordsSet.add(item.word);
+const targetD = document.getElementById(`sd_${wrongIndex}`);
+targetD.innerText = item.meanings.join(', '); 
+targetD.dataset.originalIndex = index;
+wrongIndex++;
+}
+});
+
+saveUnsentData();
+}
+
+function startSpellStep2() {
+step2Start = Date.now();
+currentUnitData.forEach((_, index) => {
+const bInput = document.getElementById(`sb_${index}`);
+bInput.classList.add('hidden');
+const resSpan = document.getElementById(`res_sb_${index}`);
+if (resSpan) resSpan.classList.add('hidden');
+
+const dText = document.getElementById(`sd_${index}`).innerText;
+const eInput = document.getElementById(`se_${index}`);
+if (dText !== '-') {
+eInput.disabled = false;
+} else {
+eInput.disabled = true;
+}
+});
+alert('철자 2차 테스트가 시작되었습니다. B열이 가려집니다.');
+}
+
+function gradeSpellStep2() {
+time2 += (Date.now() - step2Start);
+
+let wrongIndexStep3 = 0;
+currentUnitData.forEach((_, i) => {
+document.getElementById(`sg_${i}`).innerText = '-';
+});
+
+currentUnitData.forEach((_, index) => {
+const dCell = document.getElementById(`sd_${index}`);
+const eInput = document.getElementById(`se_${index}`);
+
+if (dCell.innerText !== '-' && !eInput.disabled) {
+const originalIndex = dCell.dataset.originalIndex;
+const correctWord = currentUnitData[originalIndex].word;
+
+const val = eInput.value.trim();
+let result = 'wrong';
+if (val && val.toLowerCase() === correctWord.toLowerCase()) result = 'correct';
+
+let resultHTML = "";
+if (result === 'wrong') {
+if (val) resultHTML = `<span style="text-decoration: line-through; color: #7f8c8d;">${val}</span> <span style="color: red;">${correctWord}</span>`;
+else resultHTML = `<span style="color: red;">${correctWord}</span>`;
+} else {
+resultHTML = `<span style="color: black; font-weight: bold;">${val}</span>`;
+}
+
+eInput.style.display = 'none';
+const existingSpan = document.getElementById(`res_se_${index}`);
+if (existingSpan) existingSpan.remove();
+
+const resSpan = document.createElement('span');
+resSpan.id = `res_se_${index}`;
+resSpan.innerHTML = resultHTML;
+eInput.parentNode.appendChild(resSpan);
+
+if (result === 'wrong') {
+wrongWordsSet.add(correctWord);
+const targetG = document.getElementById(`sg_${wrongIndexStep3}`);
+targetG.innerText = dCell.innerText;
+targetG.dataset.originalIndex = originalIndex;
+wrongIndexStep3++;
+}
+}
+});
+
+saveUnsentData();
+}
+
+function startSpellStep3() {
+step3Start = Date.now();
+currentUnitData.forEach((_, index) => {
+const eInput = document.getElementById(`se_${index}`);
+eInput.classList.add('hidden');
+const resSpan = document.getElementById(`res_se_${index}`);
+if (resSpan) resSpan.classList.add('hidden');
+
+const gText = document.getElementById(`sg_${index}`).innerText;
+const hInput = document.getElementById(`sh_${index}`);
+if (gText !== '-') {
+hInput.disabled = false;
+} else {
+hInput.disabled = true;
+}
+});
+alert('철자 3차 테스트가 시작되었습니다. E열이 가려집니다.');
+}
+
+function gradeSpellStep3() {
+time3 += (Date.now() - step3Start);
+
+currentUnitData.forEach((_, index) => {
+const gCell = document.getElementById(`sg_${index}`);
+const hInput = document.getElementById(`sh_${index}`);
+
+if (gCell.innerText !== '-' && !hInput.disabled) {
+const originalIndex = gCell.dataset.originalIndex;
+const correctWord = currentUnitData[originalIndex].word;
+
+const val = hInput.value.trim();
+let result = 'wrong';
+if (val && val.toLowerCase() === correctWord.toLowerCase()) result = 'correct';
+
+let resultHTML = "";
+if (result === 'wrong') {
+if (val) resultHTML = `<span style="text-decoration: line-through; color: #7f8c8d;">${val}</span> <span style="color: red;">${correctWord}</span>`;
+else resultHTML = `<span style="color: red;">${correctWord}</span>`;
+} else {
+resultHTML = `<span style="color: black; font-weight: bold;">${val}</span>`;
+}
+
+hInput.style.display = 'none';
+const existingSpan = document.getElementById(`res_sh_${index}`);
+if (existingSpan) existingSpan.remove();
+
+const resSpan = document.createElement('span');
+resSpan.id = `res_sh_${index}`;
+resSpan.innerHTML = resultHTML;
+hInput.parentNode.appendChild(resSpan);
+
+if(result === 'wrong') {
+    wrongWordsSet.add(correctWord); 
+}
+}
+});
+
+saveUnsentData();
+}
+
+// =========================================================================
+// [3번 탭] 철자 맞추기 게임 로직 (TTS 및 플래시카드 연동)
+// =========================================================================
+let currentSpellIndex = 0;
+let currentSpellWord = null;
+let typedChars = "";
+let targetChars = [];
+let remainingPool = [];
+let boxLetters = [];
+
+// TTS 발음 재생 함수
+function playTTS(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US'; 
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+// 플래시카드 표시 및 다음 단어 로드 로직
+function showFlashcard(word, meaning) {
+    const overlay = document.getElementById('flashcard-overlay');
+    document.getElementById('flashcard-word').innerText = word;
+    document.getElementById('flashcard-meaning').innerText = meaning;
+    
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '1'; 
+
+    setTimeout(() => {
+        overlay.style.opacity = '0'; 
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            currentSpellIndex++;
+            loadSpellingWord();
+        }, 500); 
+    }, 1500); 
+}
+
+function initSpellingGame() {
+currentSpellIndex = 0;
+loadSpellingWord();
+}
+
+function loadSpellingWord() {
+if (currentSpellIndex >= currentUnitData.length) {
+alert('현재 단원의 모든 게임 학습을 완료했습니다!');
+currentSpellIndex = 0;
+}
+
+const item = currentUnitData[currentSpellIndex];
+currentSpellWord = item.word;
+targetChars = currentSpellWord.split('');
+typedChars = "";
+
+document.getElementById('target-meaning').innerText = item.meanings.join(', ');
+document.getElementById('typed-word').innerText = " ";
+document.getElementById('spelling-progress').innerText = `진행: ${currentSpellIndex + 1} / ${currentUnitData.length}`;
+
+remainingPool = generatePool(currentSpellWord);
+
+boxLetters = [];
+for(let i=0; i<6; i++) {
+boxLetters.push(remainingPool.pop());
+}
+renderBoxes();
+}
+
+function generatePool(word) {
+let pool = word.split('');
+const alphabets = 'abcdefghijklmnopqrstuvwxyz';
+while(pool.length < 6) {
+pool.push(alphabets[Math.floor(Math.random() * alphabets.length)]);
+}
+return pool.sort(() => Math.random() - 0.5);
+}
+
+function renderBoxes() {
+const nextChar = targetChars[typedChars.length];
+if (nextChar && !boxLetters.includes(nextChar)) {
+const replaceIdx = Math.floor(Math.random() * 6);
+const poolIdx = remainingPool.indexOf(nextChar);
+if(poolIdx > -1) remainingPool.splice(poolIdx, 1);
+
+remainingPool.push(boxLetters[replaceIdx]);
+boxLetters[replaceIdx] = nextChar;
+}
+
+boxLetters.sort(() => Math.random() - 0.5);
+
+const container = document.getElementById('letter-container');
+container.innerHTML = '';
+boxLetters.forEach((char, idx) => {
+const div = document.createElement('div');
+div.className = 'letter-box';
+div.innerText = char;
+div.onclick = () => handleBoxClick(div, char, idx);
+container.appendChild(div);
+});
+}
+
+function handleBoxClick(element, char, idx) {
+const nextCorrectChar = targetChars[typedChars.length];
+
+if (char === nextCorrectChar) {
+typedChars += char;
+document.getElementById('typed-word').innerText = typedChars;
+
+boxLetters.splice(idx, 1);
+if (remainingPool.length > 0) {
+boxLetters.push(remainingPool.pop());
+} else {
+const alphabets = 'abcdefghijklmnopqrstuvwxyz';
+boxLetters.push(alphabets[Math.floor(Math.random() * alphabets.length)]);
+}
+
+if (typedChars === currentSpellWord) {
+    playTTS(currentSpellWord);
+    showFlashcard(currentSpellWord, currentUnitData[currentSpellIndex].meanings.join(', '));
+} else {
+    renderBoxes();
+}
+} else {
+element.classList.add('wrong-click');
+setTimeout(() => element.classList.remove('wrong-click'), 300);
+}
+}
+
+function nextSpellingWord() {
+currentSpellIndex++;
+loadSpellingWord();
+}
+
+// 화면 초기화 
+window.onload = function() {
+    if (isStudentMode) {
+        checkStudentAuth();
+    } else {
+        updateUnitSelectDropdown();
+    }
+};
+</script>
+
+
+</body></html>
